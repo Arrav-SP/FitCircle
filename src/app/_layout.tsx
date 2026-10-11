@@ -5,12 +5,20 @@ import {
 } from '@expo-google-fonts/bricolage-grotesque';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, LogBox, View } from 'react-native';
 
 import { SessionProvider, useSession } from '@/features/auth/session';
+import { rememberInviteFromUrl } from '@/features/friends/invite';
 import { queryClient } from '@/lib/query';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { useColors } from '@/theme/tokens';
+
+// The body-figure drawing library passes a touch handler the browser does not know. React warns and ignores it;
+// nothing is broken, and the warning only exists in development. Hide it so it does not cover the screen.
+LogBox.ignoreLogs(['Unknown event handler property']);
+
+// Must run before the router sends a signed-out visitor to the sign-in screen and the link is lost.
+rememberInviteFromUrl();
 
 function RootNavigator() {
   const { session, loading } = useSession();

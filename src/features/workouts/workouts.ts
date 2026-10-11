@@ -19,12 +19,13 @@ const EXERCISE_COLUMNS = 'id, name, muscle_group, tracking, default_load, owner_
 const workoutsKey = (userId: string | undefined) => ['workouts', userId];
 const exercisesKey = (userId: string | undefined) => ['exercises', userId];
 
-type WorkoutRow = {
+export type WorkoutRow = {
   id: string;
   title: string;
   started_at: string;
   duration_minutes: number;
   notes: string | null;
+  hidden?: boolean;
   workout_exercises: {
     position: number;
     exercise_id: string;
@@ -34,13 +35,14 @@ type WorkoutRow = {
   }[];
 };
 
-function toWorkout(row: WorkoutRow): Workout {
+export function toWorkout(row: WorkoutRow): Workout {
   return {
     id: row.id,
     title: row.title,
     started_at: row.started_at,
     duration_minutes: row.duration_minutes,
     notes: row.notes,
+    hidden: row.hidden ?? false,
     exercises: [...row.workout_exercises]
       .sort((a, b) => a.position - b.position)
       .map((entry) => ({
@@ -66,7 +68,7 @@ export function useWorkouts() {
       const { data, error } = await supabase
         .from('workouts')
         .select(
-          'id, title, started_at, duration_minutes, notes, workout_exercises(position, exercise_id, duration_minutes, exercises(name, muscle_group, tracking), workout_sets(position, reps, weight_kg))',
+          'id, title, started_at, duration_minutes, notes, hidden, workout_exercises(position, exercise_id, duration_minutes, exercises(name, muscle_group, tracking), workout_sets(position, reps, weight_kg))',
         )
         .order('started_at', { ascending: false })
         .limit(200);

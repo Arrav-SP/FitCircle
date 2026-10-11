@@ -9,6 +9,12 @@ function addDays(date: Date, days: number): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
 }
 
+/** The same weekday one or more weeks away, never later than `latest`. */
+export function shiftWeek(date: Date, weeks: number, latest: Date): Date {
+  const moved = addDays(date, weeks * 7);
+  return dayKey(moved) > dayKey(latest) ? latest : moved;
+}
+
 /** Monday of the week containing the given date. */
 export function startOfWeek(date: Date): Date {
   const daysSinceMonday = (date.getDay() + 6) % 7;

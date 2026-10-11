@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { dayKey, recentWeeks, startOfWeek, weekDays } from './dates.ts';
+import { dayKey, recentWeeks, shiftWeek, startOfWeek, weekDays } from './dates.ts';
 
 test('dayKey pads month and day', () => {
   assert.equal(dayKey(new Date(2026, 0, 5)), '2026-01-05');
@@ -26,4 +26,12 @@ test('recentWeeks ends with the current week and goes back across a year boundar
   assert.equal(dayKey(weeks[0][0]), '2025-12-22');
   assert.equal(dayKey(weeks[2][0]), '2026-01-05');
   assert.equal(dayKey(weeks[2][6]), '2026-01-11');
+});
+
+test('shiftWeek moves by whole weeks and never past the latest day', () => {
+  const today = new Date(2026, 9, 14); // Wednesday
+  assert.equal(dayKey(shiftWeek(today, -1, today)), '2026-10-07');
+  assert.equal(dayKey(shiftWeek(new Date(2026, 9, 7), 1, today)), '2026-10-14');
+  assert.equal(dayKey(shiftWeek(new Date(2026, 9, 9), 1, today)), '2026-10-14'); // Friday plus a week is in the future
+  assert.equal(dayKey(shiftWeek(today, 1, today)), '2026-10-14');
 });

@@ -7,6 +7,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { DateTimeField } from '@/components/DateTimeField';
 import { Screen } from '@/components/Screen';
+import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 import { uuid, type Units } from '@/lib/units';
 import { fontSize, radius, spacing, useColors } from '@/theme/tokens';
@@ -29,6 +30,11 @@ import { ExercisePicker } from './ExercisePicker';
 import { fetchLastSets, useSaveWorkout, type Exercise } from './workouts';
 
 const LOADS = Object.keys(LOAD_LABELS) as Load[];
+
+const VISIBILITY_OPTIONS = [
+  { value: 'friends', label: 'My friends' },
+  { value: 'me', label: 'Only me' },
+] as const;
 
 type Props = {
   heading: string;
@@ -318,6 +324,14 @@ export function WorkoutEditor({ heading, initial, units, storageKey, onSaved, on
         maxLength={1000}
         placeholder="How it went. Notes are never shared."
         style={{ minHeight: 96, paddingTop: spacing.md }}
+      />
+
+      <SegmentedControl
+        label="Who can see this workout"
+        hint="Friends see the exercises, sets and duration. Your notes are never shared."
+        options={VISIBILITY_OPTIONS}
+        value={draft.hidden ? 'me' : 'friends'}
+        onChange={(value) => setDraft({ ...draft, hidden: value === 'me' })}
       />
 
       {problem || save.isError ? (

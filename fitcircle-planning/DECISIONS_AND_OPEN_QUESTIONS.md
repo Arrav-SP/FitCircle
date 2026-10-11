@@ -19,6 +19,8 @@ Source references such as [S7] point to `SOURCES_AND_VERIFICATION.md`.
 | A7 | Deferred: nutrition, chat, comments, health imports, AI coaching, advanced analytics, push infrastructure, public discovery, leaderboards, group challenges, moderation tooling, store requirements | Owner's scope reset |
 | A8 | Access rules and their tests, database constraints and streak tests are not cut to save time | Owner's scope reset |
 | A9 | No implementation until the owner explicitly approves | Owner's instruction |
+| A10 | Friends see each other's workouts (exercises, sets, duration) by default; each workout has an "Only me" switch. Notes, goals, settings and body weight are never visible to others; non-friends see nothing | Owner, 12 October 2026: seeing each other's training is the point of the app. Replaces "workouts private unless shared" |
+| A11 | Three ways to hide workouts: one workout ("Only me" on the workout), everything from everyone (Profile), everything from chosen friends (eye on the Friends screen). The chosen friend is not told | Owner, 12 October 2026 |
 
 ## 2. Proposed decisions
 

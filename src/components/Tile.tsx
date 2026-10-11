@@ -10,11 +10,13 @@ type Props = PropsWithChildren<{
   caption?: string;
   /** Makes the whole tile a button. */
   onPress?: () => void;
+  /** Share a row equally with the tiles beside it. Leave off for a full-width tile. */
+  fill?: boolean;
   accessibilityLabel?: string;
 }>;
 
-/** A dashboard tile. Put two in a row with `flex: 1` wrappers, or one full width. */
-export function Tile({ title, caption, onPress, accessibilityLabel, children }: Props) {
+/** A dashboard tile. Full width by default; pass `fill` to tiles that share a row. */
+export function Tile({ title, caption, onPress, fill = false, accessibilityLabel, children }: Props) {
   const colors = useColors();
   const body = (
     <>
@@ -34,7 +36,8 @@ export function Tile({ title, caption, onPress, accessibilityLabel, children }: 
     </>
   );
   const style = {
-    flex: 1,
+    // flex: 1 in a column squeezes tiles on top of each other, so only row tiles take it.
+    flex: fill ? 1 : undefined,
     padding: spacing.lg,
     gap: spacing.lg,
     justifyContent: 'space-between' as const,

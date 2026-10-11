@@ -1,112 +1,90 @@
 # FitCircle — Implementation Prompt for Claude Code
 
-This file is a deliverable for future use. It does not authorise implementation. Give the text below the line to Claude Code only when you are ready to start building, and name the milestone you want.
+Give the text below the line to Claude Code at the start of a building session, and name the roadmap step you want.
 
 ---
 
 ## Your task
 
-You are implementing FitCircle, a partner-streak fitness app, for a solo developer who is experienced with SQL and PostgreSQL and new to React Native and Expo. You implement **one milestone at a time, and only the milestone the user names**. If the user has not named a milestone and explicitly asked you to implement it, do not write application code; ask which milestone to start.
+You are building FitCircle, a partner workout-streak app, as a private MVP for the owner, their girlfriend and a few close friends. The owner is experienced with SQL and PostgreSQL and new to React Native and Expo. You build **one roadmap step at a time, and only the step the owner names**. If no step has been named, ask which one.
 
-The specification is `docs/fitcircle-planning/FINAL_PRODUCT_BLUEPRINT.md`. It is the source of truth. `DECISIONS_AND_OPEN_QUESTIONS.md` in the same folder lists decisions and unresolved items. Read both before doing anything else. If this prompt and the blueprint disagree, stop and ask.
+The specification is `fitcircle-planning/FINAL_PRODUCT_BLUEPRINT.md`. It is the source of truth. `DECISIONS_AND_OPEN_QUESTIONS.md` in the same folder lists decisions in force. If this prompt and the blueprint disagree, stop and ask.
 
 ## Before you edit anything
 
-1. Read the repository's `CLAUDE.md` and follow it.
-2. Inspect what actually exists: directory tree, `package.json`, `app.json` or `app.config.*`, `supabase/` contents, existing migrations and tests. Do not assume the structure in the blueprint has been created.
-3. Read the blueprint sections for the named milestone (5.10) and every requirement ID it lists (5.2), plus 5.5, 5.6 and 5.8 where relevant.
-4. Tell the user, briefly: what exists, what the milestone will add, and any conflict between the repository and the blueprint. Wait for a go-ahead if there is a conflict.
+1. Read the repository's `CLAUDE.md` and `AGENTS.md` and follow them.
+2. Look at what exists: `package.json`, `src/`, `supabase/migrations/`, `supabase/tests/`. Reuse the components, hooks and patterns already there.
+3. Read the blueprint rows for the named step (section 10), its requirement IDs (section 3), and sections 6, 7 and 8 where they apply.
+4. If the repository and the blueprint conflict, say so and wait.
 
-## Preserve existing work
+## What is being built
 
-- Never overwrite, delete or reformat files unrelated to the milestone.
-- If a file you need to create already exists, read it and extend it.
-- Never edit a migration that has been applied. Add a new one.
-- Do not touch `docs/fitcircle-planning/` except to update `DECISIONS_AND_OPEN_QUESTIONS.md` when a decision changes, and say that you did.
-
-## Architecture you must use
-
-- **App:** Expo, React Native, TypeScript, Expo Router. One codebase for web and Android. No iOS-only code.
-- **Web first.** The web app launches first (M0–M6); the Android app is released in M7. Develop and verify in the browser. At the end of each milestone, make one Android build and run the milestone's main flow, or tell the user it still needs doing; the Android app must never be left broken.
-- **Zero running cost.** Use only free tiers. Do not add any paid service, paid plan, domain, or dependency that needs one. If a requirement cannot be met for free, stop and ask.
-- **Sign-in:** Google only at launch (web redirect flow). Do not build email and password sign-in.
-- **Push:** standard browser push through a service worker with VAPID keys, sent from the `send-push` edge function. `expo-notifications` does not support web; it is used only in M7 for the Android app.
-- **Server data:** TanStack Query. **Forms:** React Hook Form with Zod.
-- **Backend:** Supabase. PostgreSQL is the source of truth.
-- **Schemas:** `public` for tables and policies; `api` for functions the client may call; `private` for `security definer` internals. `private` is not exposed through the Data API.
-- **Shared state** (friend requests, friendships, blocks, challenges, streak days, shared events, notifications) is written only by database functions. The client has no insert, update or delete rights on those tables.
-- **Edge functions** exist only for `send-push` and `delete-account`.
-- **No realtime subscriptions.** Refetch on focus and after mutations.
-- **No features outside the MVP:** no nutrition, comments, chat, health imports, group challenges or native iOS work. If something seems to need one of these, stop and ask.
-- Use the structure in blueprint section 5.9. Create a directory only when you put a real file in it.
-- Choose library versions compatible with the current Expo SDK, check each library works on both Android and web before adding it, and record the versions in the README. Do not add a dependency for something a few lines of code can do.
+- **The hosted web app is the product.** Expo, React Native, TypeScript and Expo Router, exported as a web app and opened by link on phones and desktops. There is no Android or iOS build in this phase. Design for phone widths first.
+- **Google sign-in only.** No email and password.
+- **Zero running cost.** Free tiers only. No paid service, plan or domain. If something cannot be done for free, stop and ask.
+- **Backend:** Supabase. PostgreSQL is the source of truth. No edge functions unless the blueprint names one. No realtime; refetch after changes and on focus.
+- **Server data:** TanStack Query. No form, validation or state library; add a dependency only when a few lines of code cannot do the job, and install with `npx expo install`.
+- **Out of scope:** push notifications, offline use, user search, blocking, reporting, nutrition, comments, chat, health imports, store releases. If the work seems to need one, stop and ask.
 
 ## Database rules
 
-- Every new table gets, in the same migration: row level security enabled, its policies, its constraints and indexes from blueprint 5.5.
-- Every `security definer` function sets `search_path = ''`, uses schema-qualified names, has `execute` revoked from `public`, and is granted only to the roles that need it.
-- Every view is created `with (security_invoker = true)`.
-- Timestamps are `timestamptz`. A calendar day is always computed with an explicit IANA timezone.
-- Streak numbers are recomputed from `streak_days`; never incremented.
-- Evaluation and finalisation lock the challenge row first and run in one transaction.
+- Tables and policies in `public`; functions the app calls in `api`; internals in `private`, which is not exposed.
+- Every new table gets, in the same migration: row level security, its policies, explicit grants, constraints and indexes.
+- Friendships, invites, streaks and shared items are changed only by database functions. The app has no write access to those tables.
+- Every `security definer` function sets `search_path = ''`, uses schema-qualified names, acts only for `auth.uid()`, and is granted only to `authenticated`.
+- Never edit a migration that has been applied. Add a new one.
+- Timestamps are `timestamptz`. A calendar day is always computed with a named timezone.
+- Streak numbers are recomputed from the day ledger, never incremented.
 
-## Authorization must be tested
+## Tests are never skipped
 
-- For every table you add or change, write pgTAP tests that prove the allowed user can do the action and the wrong user cannot. For a denied write, also assert the target row is unchanged.
-- Implement the rows of the security test matrix (blueprint 5.6) assigned to the milestone.
-- For M4, implement all 20 streak tests in blueprint 5.8 before building streak screens.
-- A milestone is not complete while any of its required tests is missing or failing.
+- For every table added or changed, pgTAP tests prove the right user can and the wrong user cannot. A denied write also checks the row is unchanged.
+- Build the security tests the blueprint assigns to the step (section 7).
+- For step 4, write all 17 streak tests (section 8) before any streak screen.
+- Pure logic in the app gets a unit test beside it (`*.test.ts`, Node's test runner).
+- A step is not done while `npm run test:db`, `npm test`, `npm run typecheck`, `npm run lint` or `npm run build:web` fails.
 
 ## Secrets
 
-- The service-role key is used only inside edge functions, read from function secrets. It must never appear in app code, app configuration, logs, tests committed to the repository, or your messages.
-- Never print or commit the contents of `.env` files. Keep `.env.example` to variable names only.
-- If you need a credential you do not have, stop and tell the user which one and where it goes. Do not invent placeholders that look real.
+- The app holds only the public Supabase URL and key, in `.env`. The service-role key is not used.
+- Never print or commit `.env`. `.env.example` lists names only.
 
-## Working method
+## Honesty
 
-- Small steps. After each step run the relevant checks: type-check, lint, unit tests, `supabase test db`, and the end-to-end flow if the milestone has one.
-- Write the test for critical logic before the logic.
-- Explain unfamiliar mobile concepts in a sentence or two when they affect a decision the user has to make. The user knows SQL well; do not explain SQL.
-- Keep code simple and consistent with what is already in the repository. No speculative abstractions, options or configuration.
-
-## Honesty about results
-
-- Report what you actually ran and its actual output. If a test fails, show the failure.
-- Never say a test, build, integration or feature works unless you ran it and saw it work in this session.
-- Say plainly what you could not verify: anything needing a physical device, a store account, a production project, push delivery, or Google sign-in configuration that you could not exercise.
-- If a native integration or missing credential blocks a requirement, implement what can be verified, mark the rest as blocked with the exact reason, and do not fake it with mocks presented as working.
+- Report what you ran and what it printed. If something failed, show it.
+- Never say something works unless you saw it work in this session.
+- Say plainly what you could not check, such as anything needing a real phone or a real Google sign-in.
 
 ## Git and external services
 
-- Do not commit, push, create branches on a remote, open pull requests, or change Git remotes or settings unless the user explicitly asks in this session.
-- Do not deploy, publish builds, apply migrations to a hosted project, submit to a store, or create cloud resources unless the user explicitly asks. Local development stack only by default.
-- Ask before any destructive command (dropping data, resetting a database other than the local one, deleting files outside the milestone).
+- Do not commit, push, deploy, or apply migrations to the hosted database. The owner does these. Give the exact commands and a commit message.
+- Work against the local Supabase stack only.
+- Ask before any destructive command.
 
-## Milestones
+## Steps
 
-Implement only the one named. Details, acceptance criteria and test gates are in blueprint 5.10.
+| Step | Days | Build |
+|---|---|---|
+| 1 | 1–2 | Project, local and hosted Supabase, Google sign-in, first deploy |
+| 2 | 3–5 | Profile and onboarding, design system, workout logging, history, trained muscles |
+| 3 | 6–7 | Invite links, friendships, remove friend |
+| 4 | 8–10 | Streak tables, functions and tests first; then streak screens; scheduled job |
+| 5 | 11–12 | Share toggle, feed, milestones, dashboard |
+| 6 | 13 | Water, body weight; then steps and sleep |
+| 7 | 14–15 | Polish, every screen state, progress view, privacy settings, delete account |
+| 8 | 16–18 | Real use by the group, fixes, read every access rule, backup routine |
+| 9 | 19–20 | Buffer, then stretch items |
 
-| Milestone | Scope |
-|---|---|
-| M0 | Project setup, web app running, one Android development build, local Supabase, one policy-protected read, check commands |
-| M1 | Google sign-in on web, age and consent, profile, design tokens, core components, tab shell, onboarding |
-| M2 | Workout logging, exercise catalogue, records, calorie estimate, daily metrics, dashboard, offline-safe logging |
-| M3 | Friends, requests, blocking, reporting, rate limits, policy review |
-| M4 | Streak engine in the database with tests, scheduled jobs, streak screens |
-| M5 | Service worker, browser push, offline app shell, notification log, shared events, reactions |
-| M6 | Account deletion, export, free-tier production setup with the backup routine, accessibility and security review, web launch |
-| M7 | Android app: native Google sign-in, native push, store preparation, closed test, Play release |
+Checkpoints at days 5, 10, 15 and 20, and the cut order, are in blueprint section 10.
 
-## End-of-milestone report
+## When the step is done
 
-When you believe the milestone is done, report:
+Give the owner:
 
-1. Requirement IDs implemented, and any not implemented with the reason.
-2. Files and migrations added or changed.
-3. Each check you ran, the command, and the real result.
-4. What was not verified and what the user must do to verify it (for example, on the phone).
-5. Any decision you made that the blueprint did not cover, and any place you departed from it.
-6. Open questions for the user.
+1. What was built, by requirement ID, and anything left out with the reason.
+2. Each check you ran and its real result.
+3. Click-by-click steps to run it and test it, with the expected result of each and what to do when it differs.
+4. The commands to apply the migration to the hosted database and to deploy, and a commit message.
+5. Any decision the blueprint did not cover.
 
-Then stop. Do not start the next milestone until the user asks.
+Then stop. Do not start the next step until asked.

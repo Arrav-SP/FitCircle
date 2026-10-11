@@ -40,6 +40,8 @@ export type Workout = {
   started_at: string;
   duration_minutes: number;
   notes: string | null;
+  /** Hidden from friends. */
+  hidden: boolean;
   exercises: WorkoutExercise[];
 };
 
@@ -63,11 +65,12 @@ export type Draft = {
   startedAt: string;
   durationMinutes: string;
   notes: string;
+  hidden: boolean;
   exercises: DraftExercise[];
 };
 
 export function emptyDraft(now: Date): Draft {
-  return { id: uuid(), title: '', startedAt: now.toISOString(), durationMinutes: '', notes: '', exercises: [] };
+  return { id: uuid(), title: '', startedAt: now.toISOString(), durationMinutes: '', notes: '', hidden: false, exercises: [] };
 }
 
 /** "Chest + Triceps" from the muscle groups in the order they were added, at most three. */
@@ -138,6 +141,8 @@ export function toPayload(draft: Draft, units: Units) {
     started_at: draft.startedAt,
     duration_minutes: workoutMinutes(draft),
     notes: draft.notes,
+    // A draft stored before this field existed has none.
+    hidden: !!draft.hidden,
     exercises: draft.exercises.map((exercise) =>
       exercise.tracking === 'duration'
         ? { exercise_id: exercise.exercise_id, duration_minutes: parseNumber(exercise.minutes), sets: [] }
@@ -175,6 +180,7 @@ export function draftFromWorkout(workout: Workout, units: Units): Draft {
     startedAt: workout.started_at,
     durationMinutes: String(workout.duration_minutes),
     notes: workout.notes ?? '',
+    hidden: workout.hidden,
     exercises: workout.exercises.map((exercise) => ({
       key: uuid(),
       exercise_id: exercise.exercise_id,

@@ -21,14 +21,15 @@ This is a private beta for fewer than ten people who know each other. It is not 
 | Accounts | Sign in with Google; set a username, display name, units and weekly goals |
 | Workouts | Log exercises with sets, reps and weights, plus duration and notes; edit and delete |
 | History and progress | See past workouts, workouts per week, and best lift per exercise |
-| Friends | Connect through a single-use invite link; remove a friend |
+| Trained muscles | A front and back body figure with the muscles worked on a chosen day or week highlighted, with a week strip to pick the day. Added 12 October 2026 as step 2.4; uses the open-source `react-native-body-highlighter` drawing |
+| Friends | Connect through a single-use invite link; see a friend's workouts; remove a friend |
 | Partner streaks | Agree workout weekdays with one friend and keep a shared streak |
-| Feed | See workouts and streak milestones that friends chose to share |
+| Feed | See friends' workouts (all except the ones they hid) and streak milestones |
 | Water | Add glasses through the day against a goal |
 | Body weight | Log your body weight and see the trend; private to you |
 | Dashboard | Today, this week, and active streaks at a glance |
 | Look and feel | Light and dark themes; designed loading, empty, error and success states |
-| Privacy | Sharing is off by default; edit or delete any entry; delete the account |
+| Privacy | Friends see your workouts unless you hide one; notes, goals, settings and body weight are never shown; strangers see nothing; edit or delete any entry; delete the account |
 
 ### Stretch (only if the day-15 checkpoint is met)
 
@@ -43,7 +44,7 @@ Push notifications, offline use, user search, blocking, reporting, rate limits, 
 - Access rules on every table, with tests proving both allowed and denied access.
 - A streak day ledger with database tests, so the streak number is always right.
 - Friendships and streaks changed only by database functions, never written directly by the app.
-- Personal logs are private. Friends see only what was shared.
+- Workouts are visible to friends, because training together is the point of the app; any workout can be hidden. Notes, settings and body weight are never visible to anyone else. People who are not friends see nothing. (Owner's decision, 12 October 2026; replaces "private unless shared".)
 
 ## 3. Requirements
 
@@ -70,10 +71,10 @@ Push notifications, offline use, user search, blocking, reporting, rate limits, 
 | STRK-4 | A scheduled day counts when both logged a qualifying workout | Rules in section 8 |
 | STRK-5 | See current streak, longest streak, today's status for both, and day history | Matches the ledger exactly |
 | STRK-6 | Either partner can end the streak | History stays visible to both |
-| FEED-1 | Choose per workout whether to share it | Default is "not shared" |
+| FEED-1 | Friends see each workout unless it is hidden; choose per workout | Default is "My friends"; "Only me" hides it. Notes are never included |
 | FEED-2 | Streak milestones (7, 14, 30, 50, 100) appear in the feed for the pair's friends | Each partner's own friends see it only if that partner allows milestone sharing |
 | FEED-3 | Feed of friends' shared items | Shows nothing the viewer is not permitted to see |
-| FEED-4 | Stop sharing an item later | It disappears for friends on their next refresh |
+| FEED-4 | Hide a workout later | It disappears for friends on their next refresh |
 | WATR-1 | Add or undo a glass of water; daily total against the goal | One tap |
 | WGHT-1 | Log body weight for a day, in the user's units; see recent entries | Owner-only; never shown to friends or in the feed |
 | DASH-1 | Today's workout status, water, week progress, streak cards | Updates after each log without a manual refresh |
@@ -94,19 +95,33 @@ Four tabs: **Home** (dashboard and feed), **Log** (new workout, history, progres
 1. Logging takes seconds: prefill, large targets, numeric keypad.
 2. One primary action per screen.
 3. The streak carries the strongest visual weight.
-4. Sharing is always a visible choice, off by default.
+4. Who can see a workout is always shown and can be changed on the workout itself.
 
 ### Tokens
 
 | Group | Tokens |
 |---|---|
-| Colour roles (light and dark value each) | `bg`, `surface`, `surfaceRaised`, `text`, `textMuted`, `textOnAccent`, `accent`, `accentMuted`, `success`, `warning`, `danger`, `border`, `streak` |
-| Type sizes | 12, 14, 16 (body), 20, 24, 32, 48 (streak number); regular, medium, bold |
+| Colour roles (light and dark value each) | `bg`, `surface`, `surfaceSunken`, `text`, `textMuted`, `textOnAccent`, `accent`, `accentMuted`, `highlight`, `highlightSoft`, `bodyFill`, `partner`, `textOnPartner`, `success`, `warning`, `danger`, `border`, `borderStrong` |
+| Type | Headings and numbers in Bricolage Grotesque (bold, extra bold); body text in the device font. Sizes 12, 14, 16 (body), 20, 24, 32, 48 (streak number) |
 | Spacing | 4, 8, 12, 16, 24, 32, 48 |
-| Radius | 8 (inputs), 16 (cards), full (pills, avatars) |
+| Radius | 12 (inputs), 24 (cards), full (buttons, pills, avatars) |
 | Motion | 150 ms press, 250 ms transition; one celebration when a streak day completes; off when "reduce motion" is set |
 
-Components read tokens only; no colour or spacing is typed directly into a screen. Exact colours are chosen on day 3 and checked for contrast.
+The colours, as built (`src/theme/tokens.ts` is the source of truth):
+
+| Role | Light | Dark | Used for |
+|---|---|---|---|
+| `bg` | `#F3F5F9` | `#000000` (true black) | Page |
+| `surface` / `surfaceSunken` | `#FFFFFF` / `#E9EDF4` | `#131316` / `#1E1E23` | Cards / wells and skeletons |
+| `text` / `textMuted` | `#0E1526` / `#55607A` | `#F5F5F7` / `#9A9CA6` | Text |
+| `accent` / `textOnAccent` | `#14235A` (dark navy) / `#FFFFFF` | `#8FB0FF` (navy is unreadable on black, so a lighter blue of the same hue) / `#00081C` | You: primary buttons, selected day, your ring |
+| `accentMuted` | `#DDE4F6` | `#16203A` | Tinted backgrounds |
+| `partner` / `textOnPartner` | `#B97700` (marigold) / `#0E1526` | `#F5B83D` / `#000000` | Your streak partner and friends |
+| `highlight` / `highlightSoft` / `bodyFill` | `#2448D8` / `#8FA6F2` / `#E6EAF2` | `#8FB0FF` / `#44598F` / `#2A2A30` | Body figure: heavily trained / lightly trained / untrained |
+| `success` / `warning` / `danger` | `#1E7A46` / `#8A5A00` / `#C0292B` | `#5BD08A` / `#F0B455` / `#FF8A85` | Status |
+| `border` / `borderStrong` | `#D8DEEA` / `#7C869C` | `#2A2A30` / `#70737F` | Dividers / control outlines |
+
+Components read tokens only; no colour or spacing is typed directly into a screen. Every text and background pair was checked for WCAG AA contrast.
 
 ### Components
 
@@ -195,16 +210,17 @@ Schema changes reach production only through migration files.
 | No automatic backups [S25] | Manual `supabase db dump` weekly and before each migration |
 | Project pauses after about a week of low activity [S6] | Daily use by the group prevents it; restore by hand if it happens |
 
-## 6. Database (12 tables)
+## 6. Database (13 tables)
 
 | Table | Purpose | Key fields |
 |---|---|---|
 | `profiles` | What friends may see | `id` (= auth user), `username`, `display_name` |
-| `user_private` | Owner-only settings | `user_id`, `units`, `timezone`, `weekly_workout_goal`, `water_goal`, `share_workouts_default`, `share_milestones` |
+| `user_private` | Owner-only settings | `user_id`, `units`, `timezone`, `weekly_workout_goal`, `water_goal`, `share_workouts_default`, `share_milestones`, `hide_workouts` (hide every workout from every friend) |
 | `invites` | Invite links | `id`, `token` (random, unique), `inviter_id`, `expires_at`, `used_by`, `used_at` |
 | `friendships` | One row per pair | `user_low`, `user_high`, `created_at` |
+| `workout_hides` | Friends an owner has hidden their workouts from (added 12 October 2026) | `owner_id`, `friend_id` |
 | `exercises` | Catalogue | `id`, `name`, `muscle_group`, `owner_id` (null for seeded) |
-| `workouts` | A session | `id`, `user_id`, `title`, `started_at`, `duration_minutes`, `notes`, `source`, `created_at`, `updated_at` |
+| `workouts` | A session | `id`, `user_id`, `title`, `started_at`, `duration_minutes`, `notes`, `hidden`, `source`, `created_at`, `updated_at` |
 | `workout_exercises` | Exercise in a session | `id`, `workout_id`, `exercise_id`, `position` |
 | `workout_sets` | A set | `id`, `workout_exercise_id`, `position`, `reps`, `weight_kg` |
 | `metric_entries` | Water and body weight now; steps and sleep later | `id`, `user_id`, `type`, `local_date`, `value`, `source` |
@@ -248,7 +264,7 @@ Schema changes reach production only through migration files.
 
 ### Rules for functions and views [S7]
 
-- `security definer` functions live in `private`, which the API does not expose.
+- A `security definer` function the app calls lives in `api`, takes no user id, and acts only for `auth.uid()`. Any other `security definer` function lives in `private`, which the API does not expose. (Changed in step 3: signed-in users have no access to `private`, so a function they call cannot live there.)
 - Each sets `search_path = ''` and uses schema-qualified names.
 - `execute` is revoked from `public` and granted only to signed-in users where needed.
 - Any view is created with `security_invoker = true`.
@@ -263,8 +279,9 @@ Schema changes reach production only through migration files.
 | `user_private` | Owner | Owner |
 | `invites` | Inviter | Function only |
 | `friendships` | Either member | Function only |
+| `workout_hides` | Owner only, so a friend cannot tell they were chosen | Owner adds or removes current friends; cleared for a pair when the friendship ends |
 | `exercises` | Seeded rows: any signed-in user; custom rows: owner | Owner on own rows |
-| `workouts`, `workout_exercises`, `workout_sets` | Owner | Owner |
+| `workouts`, `workout_exercises`, `workout_sets` | Owner. A friend reads non-hidden workouts only through `api.friend_workouts`, which checks the friendship, the owner's hide-all setting and the owner's per-friend hide list, and leaves out notes; friends have no access to the tables | Owner |
 | `metric_entries` | Owner | Owner |
 | `streak_challenges`, `streak_days` | Either participant | Function only |
 | `shared_events` | Actor, or a current friend of the actor | Function only |
@@ -288,7 +305,8 @@ Each is tested as allowed for the right user and denied for the wrong one. A den
 | # | Scenario | Expected |
 |---|---|---|
 | 1 | A non-friend reads someone's workouts, metrics, private settings or profile | No rows |
-| 2 | A friend reads workouts, metrics or private settings | No rows |
+| 2 | A friend reads metrics, private settings, workout notes, a hidden workout, or the workout tables directly | No rows |
+| 2a | A friend reads a non-hidden workout through `api.friend_workouts`; a stranger or former friend calls it | Allowed for the friend; empty for the others |
 | 3 | A streak partner reads the partner's workouts | No rows |
 | 4 | A friend reads a shared item | Allowed |
 | 5 | A non-friend or former friend reads a shared item | No rows |

@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
@@ -7,11 +7,18 @@ import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { Tile } from '@/components/Tile';
 import { formatWorkoutDate, useWorkouts } from '@/features/workouts/workouts';
+import { dayKey } from '@/lib/dates';
 import { spacing } from '@/theme/tokens';
 
 export default function LogScreen() {
   const router = useRouter();
   const workouts = useWorkouts();
+  // Set when a date on Home was tapped: show only that day.
+  const { day } = useLocalSearchParams<{ day?: string }>();
+  const shown = (workouts.data ?? []).filter((workout) => !day || dayKey(new Date(workout.started_at)) === day);
+  const dayLabel = day
+    ? new Date(`${day}T00:00`).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
+    : null;
   const start = () => router.push('/workout/new');
 
   return (
@@ -27,16 +34,17 @@ export default function LogScreen() {
         </View>
       ) : workouts.isError ? (
         <ErrorState message="Your workouts did not load. Check your connection." onRetry={() => workouts.refetch()} />
-      ) : workouts.data.length === 0 ? (
+      ) : shown.length === 0 ? (
         <EmptyState
           icon="barbell-outline"
-          title="No workouts yet"
-          message="Log your first one and it will appear here, newest first."
+          title={day ? 'No workout that day' : 'No workouts yet'}
+          message={day ? `${dayLabel}.` : 'Log your first one and it will appear here, newest first.'}
+          action={day ? { label: 'Show all workouts', onPress: () => router.setParams({ day: undefined }) } : undefined}
         />
       ) : (
         <View style={{ gap: spacing.md }}>
-          <AppText variant="heading">History</AppText>
-          {workouts.data.map((workout) => {
+          <AppText variant="heading">{dayLabel ?? 'History'}</AppText>
+          {shown.map((workout) => {
             const sets = workout.exercises.reduce((total, exercise) => total + exercise.sets.length, 0);
             const exercises = workout.exercises.length;
             const summary =
@@ -55,6 +63,9 @@ export default function LogScreen() {
               </Tile>
             );
           })}
+          {day ? (
+            <Button label="Show all workouts" variant="secondary" onPress={() => router.setParams({ day: undefined })} />
+          ) : null}
         </View>
       )}
     </Screen>

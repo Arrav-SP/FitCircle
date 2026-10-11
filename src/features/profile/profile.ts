@@ -29,10 +29,10 @@ export function useMyProfile() {
   return useQuery({
     queryKey: profileKey(userId),
     enabled: !!userId,
-    queryFn: async (): Promise<(Profile & Settings) | null> => {
+    queryFn: async (): Promise<(Profile & Settings & { hide_workouts: boolean }) | null> => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, username, display_name, user_private(units, weekly_workout_goal, water_goal)')
+        .select('id, username, display_name, user_private(units, weekly_workout_goal, water_goal, hide_workouts)')
         .eq('id', userId!)
         .maybeSingle();
       if (error) throw error;
@@ -82,6 +82,19 @@ export function useUpdateProfile() {
         })
         .eq('user_id', userId!);
       if (settings.error) throw settings.error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKey(userId) }),
+  });
+}
+
+/** Hides every workout from every friend, or shows them again. */
+export function useSetHideWorkouts() {
+  const queryClient = useQueryClient();
+  const userId = useSession().session?.user.id;
+  return useMutation({
+    mutationFn: async (hide: boolean) => {
+      const { error } = await supabase.from('user_private').update({ hide_workouts: hide }).eq('user_id', userId!);
+      if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKey(userId) }),
   });

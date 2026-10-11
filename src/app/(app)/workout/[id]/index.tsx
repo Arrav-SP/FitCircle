@@ -64,6 +64,9 @@ export default function WorkoutDetailScreen() {
         <AppText tone="muted">
           {formatWorkoutDate(workout.started_at)} at {time}, {workout.duration_minutes} min
         </AppText>
+        <AppText variant="caption" tone="muted">
+          {workout.hidden ? 'Hidden from friends' : 'Visible to your friends'}
+        </AppText>
       </View>
 
       {workout.exercises.map((exercise, index) => (

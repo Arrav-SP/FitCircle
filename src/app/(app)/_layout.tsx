@@ -1,16 +1,29 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { ErrorState, Skeleton } from '@/components/States';
 import { signOut } from '@/features/auth/session';
+import { takePendingInvite, tokenFromPath } from '@/features/friends/invite';
 import { useMyProfile } from '@/features/profile/profile';
 import { spacing, useColors } from '@/theme/tokens';
 
 export default function AppLayout() {
   const colors = useColors();
   const profile = useMyProfile();
+  const router = useRouter();
+  const onboarded = !!profile.data;
+
+  // An invite link opened before signing in (or before onboarding) is picked up here.
+  useEffect(() => {
+    if (!onboarded) return;
+    const token = takePendingInvite();
+    if (token && tokenFromPath(window.location.pathname) === null) {
+      router.replace({ pathname: '/invite/[token]', params: { token } });
+    }
+  }, [onboarded, router]);
 
   if (profile.isPending) {
     return (
@@ -33,13 +46,15 @@ export default function AppLayout() {
     );
   }
 
-  const onboarded = profile.data !== null;
-
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
       <Stack.Protected guard={onboarded}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="muscles" />
+        <Stack.Screen name="friends" />
+        <Stack.Screen name="friend/[id]" />
+        <Stack.Screen name="invite/[token]" />
         <Stack.Screen name="workout/new" />
         <Stack.Screen name="workout/[id]/index" />
         <Stack.Screen name="workout/[id]/edit" />
