@@ -1,6 +1,8 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
-import { fontSize, radius, spacing, useColors } from '@/theme/tokens';
+import { radius, spacing, useColors } from '@/theme/tokens';
+
+import { AppText } from './AppText';
 
 type Props<T extends string> = {
   label: string;
@@ -14,7 +16,7 @@ export function SegmentedControl<T extends string>({ label, hint, options, value
   const colors = useColors();
   return (
     <View style={{ gap: spacing.xs }}>
-      <Text style={{ fontSize: fontSize.sm, fontWeight: '500', color: colors.text }}>{label}</Text>
+      <AppText variant="label">{label}</AppText>
       <View
         accessibilityRole="radiogroup"
         accessibilityLabel={label}
@@ -22,10 +24,8 @@ export function SegmentedControl<T extends string>({ label, hint, options, value
           flexDirection: 'row',
           padding: spacing.xs,
           gap: spacing.xs,
-          borderRadius: radius.full,
-          borderWidth: 1,
-          borderColor: colors.border,
-          backgroundColor: colors.surface,
+          borderRadius: radius.input,
+          backgroundColor: colors.surfaceSunken,
         }}>
         {options.map((option) => {
           const selected = option.value === value;
@@ -40,22 +40,21 @@ export function SegmentedControl<T extends string>({ label, hint, options, value
                 minHeight: 40,
                 justifyContent: 'center',
                 alignItems: 'center',
-                borderRadius: radius.full,
+                borderRadius: radius.input - spacing.xs,
                 backgroundColor: selected ? colors.accent : 'transparent',
               }}>
-              <Text
-                style={{
-                  fontSize: fontSize.md,
-                  fontWeight: selected ? '600' : '400',
-                  color: selected ? colors.textOnAccent : colors.text,
-                }}>
+              <AppText variant={selected ? 'label' : 'caption'} tone={selected ? 'onAccent' : 'default'}>
                 {option.label}
-              </Text>
+              </AppText>
             </Pressable>
           );
         })}
       </View>
-      {hint ? <Text style={{ fontSize: fontSize.sm, color: colors.textMuted }}>{hint}</Text> : null}
+      {hint ? (
+        <AppText variant="caption" tone="muted">
+          {hint}
+        </AppText>
+      ) : null}
     </View>
   );
 }

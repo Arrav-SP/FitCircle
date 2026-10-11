@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
+import { Button } from '@/components/Button';
+import { PairRings } from '@/components/PairRings';
+import { Screen } from '@/components/Screen';
 import { signInWithGoogle } from '@/features/auth/session';
-import { fontSize, radius, spacing, useColors } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 
 export default function SignInScreen() {
-  const colors = useColors();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,46 +18,31 @@ export default function SignInScreen() {
     const { error } = await signInWithGoogle();
     // On success the browser leaves for Google, so only a failure returns here.
     if (error) {
-      setError('Could not start Google sign-in. Check your connection and try again.');
+      setError('Google sign-in did not start. Check your connection and try again.');
       setBusy(false);
     }
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, gap: spacing.xl }}>
-      <View style={{ alignItems: 'center', gap: spacing.sm }}>
-        <Text accessibilityRole="header" style={{ fontSize: fontSize.xxl, fontWeight: '700', color: colors.text }}>
-          FitCircle
-        </Text>
-        <Text style={{ fontSize: fontSize.md, color: colors.textMuted, textAlign: 'center' }}>
-          Keep a workout streak with a friend.
-        </Text>
+    <Screen centered>
+      <View style={{ gap: spacing.xl }}>
+        <PairRings size={72} youDone partnerDone />
+        <View style={{ gap: spacing.sm }}>
+          <AppText variant="display">Two people. One streak.</AppText>
+          <AppText tone="muted">
+            Pick your workout days with a friend. The streak grows only when you both show up.
+          </AppText>
+        </View>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        disabled={busy}
-        onPress={onPress}
-        style={{
-          minHeight: 48,
-          minWidth: 240,
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingHorizontal: spacing.xl,
-          borderRadius: radius.full,
-          backgroundColor: colors.accent,
-          opacity: busy ? 0.6 : 1,
-        }}>
-        <Text style={{ fontSize: fontSize.md, fontWeight: '600', color: colors.textOnAccent }}>
-          {busy ? 'Opening Google…' : 'Continue with Google'}
-        </Text>
-      </Pressable>
-
-      {error && (
-        <Text accessibilityRole="alert" style={{ fontSize: fontSize.sm, color: colors.danger, textAlign: 'center' }}>
-          {error}
-        </Text>
-      )}
-    </View>
+      <View style={{ gap: spacing.md }}>
+        <Button label={busy ? 'Opening Google…' : 'Continue with Google'} onPress={onPress} disabled={busy} />
+        {error ? (
+          <AppText variant="caption" tone="danger" accessibilityRole="alert">
+            {error}
+          </AppText>
+        ) : null}
+      </View>
+    </Screen>
   );
 }

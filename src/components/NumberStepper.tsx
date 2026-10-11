@@ -1,6 +1,9 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, Text, View } from 'react-native';
 
-import { fontSize, radius, spacing, useColors } from '@/theme/tokens';
+import { fonts, fontSize, radius, spacing, useColors } from '@/theme/tokens';
+
+import { AppText } from './AppText';
 
 type Props = {
   label: string;
@@ -14,7 +17,7 @@ type Props = {
 export function NumberStepper({ label, value, min, max, unit, onChange }: Props) {
   const colors = useColors();
 
-  const step = (delta: number, symbol: string, name: string) => {
+  const step = (delta: number, icon: 'remove' | 'add', name: string) => {
     const next = value + delta;
     const disabled = next < min || next > max;
     return (
@@ -24,33 +27,38 @@ export function NumberStepper({ label, value, min, max, unit, onChange }: Props)
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={() => onChange(next)}
-        style={{
+        style={({ pressed }) => ({
           width: 48,
           height: 48,
           justifyContent: 'center',
           alignItems: 'center',
           borderRadius: radius.full,
-          borderWidth: 1,
-          borderColor: colors.border,
-          opacity: disabled ? 0.4 : 1,
-        }}>
-        <Text style={{ fontSize: fontSize.lg, color: colors.text }}>{symbol}</Text>
+          backgroundColor: colors.accentMuted,
+          opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
+        })}>
+        <Ionicons name={icon} size={22} color={colors.accent} />
       </Pressable>
     );
   };
 
   return (
-    <View style={{ gap: spacing.xs }}>
-      <Text style={{ fontSize: fontSize.sm, fontWeight: '500', color: colors.text }}>{label}</Text>
+    <View style={{ gap: spacing.sm }}>
+      <AppText variant="label">{label}</AppText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
-        {step(-1, '−', 'Decrease')}
-        <Text
-          accessibilityLiveRegion="polite"
-          style={{ minWidth: 96, textAlign: 'center', fontSize: fontSize.lg, fontWeight: '600', color: colors.text }}>
-          {value}
-          {unit ? ` ${unit}` : ''}
-        </Text>
-        {step(1, '+', 'Increase')}
+        {step(-1, 'remove', 'Decrease')}
+        <View style={{ minWidth: 96, alignItems: 'center' }}>
+          <Text
+            accessibilityLiveRegion="polite"
+            style={{ fontFamily: fonts.displayHeavy, fontSize: fontSize.xl, color: colors.text, fontVariant: ['tabular-nums'] }}>
+            {value}
+          </Text>
+          {unit ? (
+            <AppText variant="caption" tone="muted">
+              {unit}
+            </AppText>
+          ) : null}
+        </View>
+        {step(1, 'add', 'Increase')}
       </View>
     </View>
   );

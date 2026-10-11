@@ -1,10 +1,12 @@
 import { Stack } from 'expo-router';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Screen } from '@/components/Screen';
+import { ErrorState, Skeleton } from '@/components/States';
 import { signOut } from '@/features/auth/session';
 import { useMyProfile } from '@/features/profile/profile';
-import { fontSize, spacing, useColors } from '@/theme/tokens';
+import { spacing, useColors } from '@/theme/tokens';
 
 export default function AppLayout() {
   const colors = useColors();
@@ -12,21 +14,22 @@ export default function AppLayout() {
 
   if (profile.isPending) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.bg }}>
-        <ActivityIndicator color={colors.accent} />
-      </View>
+      <Screen>
+        <Skeleton height={38} width="60%" />
+        <Skeleton height={140} />
+        <Skeleton height={140} />
+      </Screen>
     );
   }
 
   if (profile.isError) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, gap: spacing.lg, backgroundColor: colors.bg }}>
-        <Text accessibilityRole="alert" style={{ fontSize: fontSize.md, color: colors.text, textAlign: 'center' }}>
-          Could not load your profile. Check your connection.
-        </Text>
-        <Button label="Try again" onPress={() => profile.refetch()} />
-        <Button label="Sign out" variant="secondary" onPress={() => signOut()} />
-      </View>
+      <Screen centered>
+        <ErrorState message="Your profile did not load. Check your connection." onRetry={() => profile.refetch()} />
+        <View style={{ alignItems: 'center', marginTop: -spacing.lg }}>
+          <Button label="Sign out" variant="secondary" onPress={() => signOut()} />
+        </View>
+      </Screen>
     );
   }
 
@@ -35,7 +38,7 @@ export default function AppLayout() {
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
       <Stack.Protected guard={onboarded}>
-        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded}>

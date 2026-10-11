@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { NumberStepper } from '@/components/NumberStepper';
+import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
-import { fontSize, spacing, useColors } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 
 import { USERNAME_PATTERN, type ProfileInput } from './profile';
 
@@ -28,7 +30,6 @@ const UNIT_OPTIONS = [
 ] as const;
 
 export function ProfileForm(props: Props) {
-  const colors = useColors();
   const [form, setForm] = useState(props.initial);
   const [touched, setTouched] = useState(false);
 
@@ -48,22 +49,10 @@ export function ProfileForm(props: Props) {
   }
 
   return (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{
-        width: '100%',
-        maxWidth: 480,
-        alignSelf: 'center',
-        padding: spacing.xl,
-        gap: spacing.xl,
-      }}>
+    <Screen>
       <View style={{ gap: spacing.sm }}>
-        <Text accessibilityRole="header" style={{ fontSize: fontSize.xl, fontWeight: '700', color: colors.text }}>
-          {props.title}
-        </Text>
-        {props.subtitle ? (
-          <Text style={{ fontSize: fontSize.md, color: colors.textMuted }}>{props.subtitle}</Text>
-        ) : null}
+        <AppText variant="title">{props.title}</AppText>
+        {props.subtitle ? <AppText tone="muted">{props.subtitle}</AppText> : null}
       </View>
 
       <TextField
@@ -100,6 +89,7 @@ export function ProfileForm(props: Props) {
         value={form.weekly_workout_goal}
         min={1}
         max={7}
+        unit="per week"
         onChange={(weekly_workout_goal) => setForm({ ...form, weekly_workout_goal })}
       />
 
@@ -108,20 +98,20 @@ export function ProfileForm(props: Props) {
         value={form.water_goal}
         min={1}
         max={30}
-        unit="glasses"
+        unit="glasses per day"
         onChange={(water_goal) => setForm({ ...form, water_goal })}
       />
 
       {props.error ? (
-        <Text accessibilityRole="alert" style={{ fontSize: fontSize.sm, color: colors.danger }}>
+        <AppText variant="caption" tone="danger" accessibilityRole="alert">
           {props.error}
-        </Text>
+        </AppText>
       ) : null}
 
       <View style={{ gap: spacing.md }}>
         <Button label={props.busy ? 'Saving…' : props.submitLabel} onPress={submit} disabled={props.busy} />
         {props.onCancel ? <Button label="Cancel" variant="secondary" onPress={props.onCancel} /> : null}
       </View>
-    </ScrollView>
+    </Screen>
   );
 }

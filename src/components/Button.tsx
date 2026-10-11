@@ -1,11 +1,13 @@
-import { Pressable, Text } from 'react-native';
+import { Pressable } from 'react-native';
 
-import { fontSize, radius, spacing, useColors } from '@/theme/tokens';
+import { radius, spacing, useColors } from '@/theme/tokens';
+
+import { AppText } from './AppText';
 
 type Props = {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'danger';
   disabled?: boolean;
 };
 
@@ -25,13 +27,13 @@ export function Button({ label, onPress, variant = 'primary', disabled = false }
         paddingHorizontal: spacing.xl,
         borderRadius: radius.full,
         backgroundColor: primary ? colors.accent : 'transparent',
-        borderWidth: primary ? 0 : 1,
-        borderColor: colors.border,
-        opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+        borderWidth: primary ? 0 : 1.5,
+        borderColor: variant === 'danger' ? colors.danger : colors.borderStrong,
+        opacity: disabled ? 0.5 : pressed ? 0.8 : 1,
       })}>
-      <Text style={{ fontSize: fontSize.md, fontWeight: '600', color: primary ? colors.textOnAccent : colors.text }}>
+      <AppText variant="label" tone={primary ? 'onAccent' : variant === 'danger' ? 'danger' : 'default'} style={{ fontSize: 16 }}>
         {label}
-      </Text>
+      </AppText>
     </Pressable>
   );
 }

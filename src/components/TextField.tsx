@@ -1,6 +1,8 @@
-import { Text, TextInput, View, type TextInputProps } from 'react-native';
+import { TextInput, View, type TextInputProps } from 'react-native';
 
 import { fontSize, radius, spacing, useColors } from '@/theme/tokens';
+
+import { AppText } from './AppText';
 
 type Props = TextInputProps & {
   label: string;
@@ -12,7 +14,7 @@ export function TextField({ label, hint, error, editable = true, ...input }: Pro
   const colors = useColors();
   return (
     <View style={{ gap: spacing.xs }}>
-      <Text style={{ fontSize: fontSize.sm, fontWeight: '500', color: colors.text }}>{label}</Text>
+      <AppText variant="label">{label}</AppText>
       <TextInput
         accessibilityLabel={label}
         editable={editable}
@@ -22,19 +24,21 @@ export function TextField({ label, hint, error, editable = true, ...input }: Pro
           minHeight: 48,
           paddingHorizontal: spacing.lg,
           borderRadius: radius.input,
-          borderWidth: 1,
-          borderColor: error ? colors.danger : colors.border,
-          backgroundColor: colors.surface,
+          borderWidth: 1.5,
+          borderColor: error ? colors.danger : editable ? colors.borderStrong : colors.border,
+          backgroundColor: editable ? colors.surface : colors.surfaceSunken,
           color: editable ? colors.text : colors.textMuted,
           fontSize: fontSize.md,
         }}
       />
       {error ? (
-        <Text accessibilityRole="alert" style={{ fontSize: fontSize.sm, color: colors.danger }}>
+        <AppText variant="caption" tone="danger" accessibilityRole="alert">
           {error}
-        </Text>
+        </AppText>
       ) : hint ? (
-        <Text style={{ fontSize: fontSize.sm, color: colors.textMuted }}>{hint}</Text>
+        <AppText variant="caption" tone="muted">
+          {hint}
+        </AppText>
       ) : null}
     </View>
   );
