@@ -11,19 +11,18 @@ import { Screen } from '@/components/Screen';
 import { Tile } from '@/components/Tile';
 import { WeekStrip } from '@/components/WeekStrip';
 import { useMyProfile } from '@/features/profile/profile';
+import { useWorkouts } from '@/features/workouts/workouts';
 import { dayKey, weekDays } from '@/lib/dates';
 import { spacing } from '@/theme/tokens';
-
-// Workout days come from the database once logging is built (step 2.3). Until then there are none.
-const NO_WORKOUT_DAYS: ReadonlySet<string> = new Set();
 
 export default function HomeScreen() {
   const router = useRouter();
   const profile = useMyProfile().data;
+  const workouts = useWorkouts().data;
   if (!profile) return null;
 
   const today = new Date();
-  const workoutDays = NO_WORKOUT_DAYS;
+  const workoutDays = new Set((workouts ?? []).map((workout) => dayKey(new Date(workout.started_at))));
   const thisWeek = weekDays(today).filter((day) => workoutDays.has(dayKey(day))).length;
   const goal = profile.weekly_workout_goal;
   const firstName = profile.display_name.split(/\s+/)[0];
@@ -60,7 +59,7 @@ export default function HomeScreen() {
         </Tile>
       </View>
 
-      <Button label="Log a workout" onPress={() => router.push('/log')} />
+      <Button label="Log a workout" onPress={() => router.push('/workout/new')} />
     </Screen>
   );
 }

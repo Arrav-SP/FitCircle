@@ -55,7 +55,7 @@ select throws_ok(
 -- Back to the owner role to confirm Bob's updates changed nothing.
 reset role;
 select is((select display_name from public.profiles where username = 'alice'), 'Alice', 'denied profile update left the row unchanged');
-select is((select water_goal from public.user_private)::int, 10, 'denied settings update left the row unchanged');
+select is((select water_goal from public.user_private where user_id = '00000000-0000-0000-0000-00000000000a')::int, 10, 'denied settings update left the row unchanged');
 
 select * from finish();
 rollback;

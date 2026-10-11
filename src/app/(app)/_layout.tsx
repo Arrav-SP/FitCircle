@@ -40,6 +40,9 @@ export default function AppLayout() {
       <Stack.Protected guard={onboarded}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="workout/new" />
+        <Stack.Screen name="workout/[id]/index" />
+        <Stack.Screen name="workout/[id]/edit" />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded}>
         <Stack.Screen name="onboarding" />

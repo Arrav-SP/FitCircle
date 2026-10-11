@@ -203,8 +203,8 @@ Schema changes reach production only through migration files.
 | `user_private` | Owner-only settings | `user_id`, `units`, `timezone`, `weekly_workout_goal`, `water_goal`, `share_workouts_default`, `share_milestones` |
 | `invites` | Invite links | `id`, `token` (random, unique), `inviter_id`, `expires_at`, `used_by`, `used_at` |
 | `friendships` | One row per pair | `user_low`, `user_high`, `created_at` |
-| `exercises` | Catalogue | `id`, `name`, `owner_id` (null for seeded) |
-| `workouts` | A session | `id`, `user_id`, `started_at`, `duration_minutes`, `notes`, `source`, `created_at`, `updated_at` |
+| `exercises` | Catalogue | `id`, `name`, `muscle_group`, `owner_id` (null for seeded) |
+| `workouts` | A session | `id`, `user_id`, `title`, `started_at`, `duration_minutes`, `notes`, `source`, `created_at`, `updated_at` |
 | `workout_exercises` | Exercise in a session | `id`, `workout_id`, `exercise_id`, `position` |
 | `workout_sets` | A set | `id`, `workout_exercise_id`, `position`, `reps`, `weight_kg` |
 | `metric_entries` | Water and body weight now; steps and sleep later | `id`, `user_id`, `type`, `local_date`, `value`, `source` |

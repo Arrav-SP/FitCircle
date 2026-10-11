@@ -10,7 +10,7 @@ type Props = TextInputProps & {
   error?: string | null;
 };
 
-export function TextField({ label, hint, error, editable = true, ...input }: Props) {
+export function TextField({ label, hint, error, editable = true, style, ...input }: Props) {
   const colors = useColors();
   return (
     <View style={{ gap: spacing.xs }}>
@@ -20,7 +20,8 @@ export function TextField({ label, hint, error, editable = true, ...input }: Pro
         editable={editable}
         placeholderTextColor={colors.textMuted}
         {...input}
-        style={{
+        style={[
+          {
           minHeight: 48,
           paddingHorizontal: spacing.lg,
           borderRadius: radius.input,
@@ -29,7 +30,9 @@ export function TextField({ label, hint, error, editable = true, ...input }: Pro
           backgroundColor: editable ? colors.surface : colors.surfaceSunken,
           color: editable ? colors.text : colors.textMuted,
           fontSize: fontSize.md,
-        }}
+          },
+          style,
+        ]}
       />
       {error ? (
         <AppText variant="caption" tone="danger" accessibilityRole="alert">
