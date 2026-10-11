@@ -14,7 +14,8 @@ Expo SDK 57 (React Native 0.86, React 19), Supabase (`@supabase/supabase-js` 2.x
 | `npx supabase start` | Start the local database (needs Docker running) |
 | `npm run test:db` | Run the database tests against the local database |
 | `npx supabase stop` | Stop the local database |
-| `npx expo export --platform web` | Build the website into `dist/` |
+| `npm run build:web` | Build the website into `dist/`. Always clears the build cache, because a cached build can keep old `.env` values |
+| `npx eas-cli@latest deploy --prod` | Upload `dist/` to the public link |
 
 ## First-time setup
 

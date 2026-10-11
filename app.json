@@ -37,6 +37,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "01b668a0-2fdd-468d-b887-f79dded041c1"
+      }
+    },
+    "owner": "aravs-team"
   }
 }
