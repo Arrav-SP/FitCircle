@@ -1,6 +1,6 @@
 # FitCircle
 
-A private workout-streak app for a small group of friends. Plan and scope: `docs/fitcircle-planning/FINAL_PRODUCT_BLUEPRINT.md`.
+A private workout-streak app for a small group of friends. Plan and scope: `fitcircle-planning/FINAL_PRODUCT_BLUEPRINT.md`.
 
 Expo SDK 57 (React Native 0.86, React 19), Supabase (`@supabase/supabase-js` 2.x, CLI 2.120). The product is the web build; routes live in `src/app/`.
 
@@ -10,6 +10,7 @@ Expo SDK 57 (React Native 0.86, React 19), Supabase (`@supabase/supabase-js` 2.x
 |---|---|
 | `npm run web` | Start the app in a browser at http://localhost:8081 |
 | `npm run typecheck` | Type-check |
+| `npm test` | Run the unit tests |
 | `npm run lint` | Lint |
 | `npx supabase start` | Start the local database (needs Docker running) |
 | `npm run test:db` | Run the database tests against the local database |

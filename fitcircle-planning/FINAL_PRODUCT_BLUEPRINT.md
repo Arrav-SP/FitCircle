@@ -25,6 +25,7 @@ This is a private beta for fewer than ten people who know each other. It is not 
 | Partner streaks | Agree workout weekdays with one friend and keep a shared streak |
 | Feed | See workouts and streak milestones that friends chose to share |
 | Water | Add glasses through the day against a goal |
+| Body weight | Log your body weight and see the trend; private to you |
 | Dashboard | Today, this week, and active streaks at a glance |
 | Look and feel | Light and dark themes; designed loading, empty, error and success states |
 | Privacy | Sharing is off by default; edit or delete any entry; delete the account |
@@ -50,6 +51,7 @@ Push notifications, offline use, user search, blocking, reporting, rate limits, 
 |---|---|---|
 | AUTH-1 | Sign in with Google | Works on the hosted link from an Android phone, an iPhone and a desktop browser |
 | AUTH-2 | Sign out | The session ends on that device |
+| AUTH-3 | Automatic sign-out after 15 days without using the app on a device | Opening the app after more than 15 idle days shows the sign-in screen. Tracked per device in the browser, not on the server |
 | PROF-1 | Unique username (3–20 letters, digits, underscore) and display name | A duplicate username is rejected, ignoring case |
 | PROF-2 | Units (kg or lb) and weekly workout goal, daily water goal | Stored privately; never visible to friends |
 | WORK-1 | Log a workout: start time, duration, notes, exercises, sets with reps and weight | Saved workout appears in history |
@@ -73,6 +75,7 @@ Push notifications, offline use, user search, blocking, reporting, rate limits, 
 | FEED-3 | Feed of friends' shared items | Shows nothing the viewer is not permitted to see |
 | FEED-4 | Stop sharing an item later | It disappears for friends on their next refresh |
 | WATR-1 | Add or undo a glass of water; daily total against the goal | One tap |
+| WGHT-1 | Log body weight for a day, in the user's units; see recent entries | Owner-only; never shown to friends or in the feed |
 | DASH-1 | Today's workout status, water, week progress, streak cards | Updates after each log without a manual refresh |
 | PRIV-1 | Delete account | All of the user's rows are removed and their streaks end |
 | UI-1 | Light, dark and system themes | Both themes pass a contrast check |
@@ -204,7 +207,7 @@ Schema changes reach production only through migration files.
 | `workouts` | A session | `id`, `user_id`, `started_at`, `duration_minutes`, `notes`, `source`, `created_at`, `updated_at` |
 | `workout_exercises` | Exercise in a session | `id`, `workout_id`, `exercise_id`, `position` |
 | `workout_sets` | A set | `id`, `workout_exercise_id`, `position`, `reps`, `weight_kg` |
-| `metric_entries` | Water now; steps and sleep later | `id`, `user_id`, `type`, `local_date`, `value`, `source` |
+| `metric_entries` | Water and body weight now; steps and sleep later | `id`, `user_id`, `type`, `local_date`, `value`, `source` |
 | `streak_challenges` | Configuration and state | `id`, `user_a`, `user_b`, `proposer_id`, `status`, `timezone`, `weekdays`, `min_minutes`, `start_date`, `current_streak`, `longest_streak`, `last_finalised_date` |
 | `streak_days` | Day ledger | `challenge_id`, `local_date`, `a_done`, `b_done`, `status` (open, complete, missed), `finalised_at` |
 | `shared_events` | What friends may see | `id`, `actor_id`, `kind` (workout, milestone), `workout_id`, `challenge_id`, `summary`, `created_at` |
@@ -388,7 +391,7 @@ Twenty calendar days at 4–5 hours a day. Each step ends with its check passing
 | 3 | 6–7 | Invite links; friendships; remove friend | 2 | Two accounts connect by link | Security tests 1, 2, 6, 7, 8, 12, 13, 14 | 8–10 | Nothing |
 | 4 | 8–10 | Streak tables, functions and tests first; then proposal and streak screens; scheduled job | 2, 3 | Two accounts complete a streak day end to end | All 17 streak tests; security tests 3, 9, 10 | 14–18 | Day-history calendar; minimum minutes (use "any workout") |
 | 5 | 11–12 | Share toggle; feed; milestones; dashboard | 2, 3, 4 | A shared workout shows for the friend and an unshared one does not | Security tests 4, 5; manual two-account run | 9–12 | Week view on the dashboard; milestones |
-| 6 | 13 | Water; then steps and sleep | 2 | Water total shows on the dashboard | Access test for metrics; manual | 4–5 | Steps and sleep |
+| 6 | 13 | Water; body weight; then steps and sleep | 2 | Water total shows on the dashboard; a body weight entry can be logged and seen | Access test for metrics; manual | 5–6 | Steps and sleep |
 | 7 | 14–15 | Theme polish; every screen state; phone layouts; progress view; privacy settings; delete account | 1–6 | Feature complete; girlfriend and one friend invited | Contrast check; manual walkthrough in both themes; deletion test | 9–12 | Progress charts (keep the list) |
 | 8 | 16–18 | Use by the real group; bug fixes; read every access rule line by line; backup routine | 7 | No known bug that loses or leaks data | Full security and streak test run; first database dump restored locally | 12–15 | Nothing |
 | 9 | 19–20 | Buffer; then reactions and other stretch items | 8 | The group is using it daily | — | 7–10 | All stretch items |

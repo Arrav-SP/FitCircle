@@ -1,32 +1,45 @@
-import { Pressable, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Text, View } from 'react-native';
 
-import { signOut, useSession } from '@/features/auth/session';
+import { Button } from '@/components/Button';
+import { signOut } from '@/features/auth/session';
+import { useMyProfile } from '@/features/profile/profile';
 import { fontSize, radius, spacing, useColors } from '@/theme/tokens';
 
-// Placeholder until the tab shell and dashboard arrive in step 2.
+// Placeholder home until the tab shell and dashboard arrive.
 export default function HomeScreen() {
   const colors = useColors();
-  const { session } = useSession();
+  const router = useRouter();
+  const profile = useMyProfile().data;
+
+  if (!profile) return null;
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, gap: spacing.lg }}>
-      <Text accessibilityRole="header" style={{ fontSize: fontSize.xl, fontWeight: '700', color: colors.text }}>
-        You are signed in
-      </Text>
-      <Text style={{ fontSize: fontSize.md, color: colors.textMuted }}>{session?.user.email}</Text>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => signOut()}
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }}>
+      <View
         style={{
-          minHeight: 48,
-          justifyContent: 'center',
-          paddingHorizontal: spacing.xl,
-          borderRadius: radius.full,
+          width: '100%',
+          maxWidth: 420,
+          padding: spacing.xl,
+          gap: spacing.lg,
+          borderRadius: radius.card,
           borderWidth: 1,
           borderColor: colors.border,
+          backgroundColor: colors.surface,
         }}>
-        <Text style={{ fontSize: fontSize.md, color: colors.text }}>Sign out</Text>
-      </Pressable>
+        <View style={{ gap: spacing.xs }}>
+          <Text accessibilityRole="header" style={{ fontSize: fontSize.xl, fontWeight: '700', color: colors.text }}>
+            Hi, {profile.display_name}
+          </Text>
+          <Text style={{ fontSize: fontSize.md, color: colors.textMuted }}>@{profile.username}</Text>
+        </View>
+        <Text style={{ fontSize: fontSize.md, color: colors.text }}>
+          Goal: {profile.weekly_workout_goal} workouts a week · {profile.water_goal} glasses of water a day · lifts
+          shown in {profile.units}
+        </Text>
+        <Button label="Edit profile and goals" onPress={() => router.push('/settings')} />
+        <Button label="Sign out" variant="secondary" onPress={() => signOut()} />
+      </View>
     </View>
   );
 }
