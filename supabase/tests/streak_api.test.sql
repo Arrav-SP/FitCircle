@@ -1,6 +1,6 @@
 -- Proposing, answering, cancelling and ending a streak, and who may read or change what.
 begin;
-select plan(36);
+select plan(41);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'alice@test.local'),
@@ -141,6 +141,25 @@ select is(
 select is(
   (select a_done || ',' || b_done from public.streak_days where challenge_id = current_setting('test.streak')::uuid),
   'true,false', 'a workout logged earlier that day already counts');
+
+-- The deal: an optional reward, forfeit and target, seen by the friend before accepting.
+select set_config('role', 'authenticated', true), set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+select throws_ok(
+  $$select api.propose_streak('00000000-0000-0000-0000-00000000000a', '{1}', 20, false, 'Dinner', 'Coffee', 8)$$,
+  'P0001', 'invalid_deal', 'the target must be one of the offered day counts');
+select throws_ok(
+  $$select api.propose_streak('00000000-0000-0000-0000-00000000000a', '{1}', 20, false, repeat('x', 81), null, 30)$$,
+  'P0001', 'invalid_deal', 'a reward longer than 80 characters is refused');
+select lives_ok(
+  $$select set_config('test.streak', api.propose_streak('00000000-0000-0000-0000-00000000000a', '{1}', 20, false, '  Dinner out ', '   ', 30)::text, true)$$,
+  'a streak can be proposed with a deal');
+select set_config('role', 'authenticated', true), set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select is(
+  (select reward || '|' || coalesce(forfeit, 'none') || '|' || target_days from public.streak_challenges
+   where id = current_setting('test.streak')::uuid),
+  'Dinner out|none|30', 'the invited friend sees the tidied deal before accepting; a blank forfeit means none');
+select throws_ok(
+  $$update public.streak_challenges set reward = 'A car'$$, '42501', null, 'the deal cannot be changed directly');
 
 select * from finish();
 rollback;

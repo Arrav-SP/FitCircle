@@ -99,6 +99,16 @@ export default function StreaksScreen() {
                 {streak.start_same_day ? 'on acceptance' : 'the day after acceptance'}
               </AppText>
             </View>
+            {streak.reward || streak.forfeit ? (
+              <View>
+                {streak.reward ? (
+                  <AppText>
+                    Reward{streak.target_days ? ` at ${streak.target_days} days` : ''}: {streak.reward}
+                  </AppText>
+                ) : null}
+                {streak.forfeit ? <AppText>Forfeit for a missed day: {streak.forfeit}</AppText> : null}
+              </View>
+            ) : null}
             {mine ? (
               <Button label="Cancel proposal" variant="secondary" disabled={busy} onPress={() => cancel.mutate(streak.id)} />
             ) : (

@@ -4,13 +4,15 @@ import { Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
 import { NumberStepper } from '@/components/NumberStepper';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
+import { TextField } from '@/components/TextField';
 import { useSession } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
-import { partnerId, streakErrorMessage, WEEKDAY_LABELS } from '@/features/streaks/streak';
+import { DEAL_TARGETS, partnerId, streakErrorMessage, WEEKDAY_LABELS } from '@/features/streaks/streak';
 import { useProposeStreak, useStreaks } from '@/features/streaks/streaks';
 import { radius, spacing, useColors } from '@/theme/tokens';
 
@@ -56,6 +58,9 @@ export default function NewStreakScreen() {
   const [weekdays, setWeekdays] = useState<number[]>([1, 3, 5]);
   const [minMinutes, setMinMinutes] = useState(20);
   const [start, setStart] = useState<'same' | 'next'>('same');
+  const [reward, setReward] = useState('');
+  const [forfeit, setForfeit] = useState('');
+  const [targetDays, setTargetDays] = useState<number | null>(null);
 
   if (friends.isPending || streaks.isPending) {
     return (
@@ -156,6 +161,38 @@ export default function NewStreakScreen() {
         onChange={setStart}
       />
 
+      <Card>
+        <View>
+          <AppText variant="heading">The deal</AppText>
+          <AppText variant="caption" tone="muted">
+            Optional. Your friend sees it before accepting, and it cannot be changed later.
+          </AppText>
+        </View>
+        <TextField label="Reward" value={reward} onChangeText={setReward} maxLength={80} placeholder="Dinner out" />
+        <View style={{ gap: spacing.sm }}>
+          <AppText variant="label">Reward at</AppText>
+          <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+            <Chip role="radio" label="No target" selected={targetDays === null} onPress={() => setTargetDays(null)} />
+            {DEAL_TARGETS.map((days) => (
+              <Chip
+                key={days}
+                role="radio"
+                label={`${days} days`}
+                selected={targetDays === days}
+                onPress={() => setTargetDays(days)}
+              />
+            ))}
+          </View>
+        </View>
+        <TextField
+          label="Forfeit for whoever misses a day"
+          value={forfeit}
+          onChangeText={setForfeit}
+          maxLength={80}
+          placeholder="Buys the coffee"
+        />
+      </Card>
+
       {propose.isError ? (
         <AppText variant="caption" tone="danger" accessibilityRole="alert">
           {streakErrorMessage(propose.error)}
@@ -169,7 +206,7 @@ export default function NewStreakScreen() {
           onPress={() =>
             chosen &&
             propose.mutate(
-              { friendId: chosen, weekdays, minMinutes, startSameDay: start === 'same' },
+              { friendId: chosen, weekdays, minMinutes, startSameDay: start === 'same', reward, forfeit, targetDays },
               { onSuccess: () => router.replace('/streaks') },
             )
           }

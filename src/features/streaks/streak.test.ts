@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { flameLevel, isoWeekday, localDateIn, scheduleLabel, todayFor, todayLine, type Streak } from './streak.ts';
+import { flameLevel, forfeitOwed, isoWeekday, localDateIn, rewardProgress, scheduleLabel, todayFor, todayLine, type Streak } from './streak.ts';
 
 const base: Streak = {
   id: 's',
@@ -14,6 +14,9 @@ const base: Streak = {
   min_minutes: 20,
   start_date: '2026-01-05',
   start_same_day: false,
+  reward: null,
+  forfeit: null,
+  target_days: null,
   current_streak: 0,
   longest_streak: 0,
   days: [],
@@ -55,4 +58,24 @@ test('todayLine names who is still to train', () => {
 
 test('flameLevel steps up at 1, 3, 7, 14, 30, 50 and 100 days', () => {
   assert.deepEqual([0, 1, 2, 3, 6, 7, 13, 14, 30, 49, 50, 99, 100, 365].map(flameLevel), [0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6, 7, 7]);
+});
+
+test('rewardProgress counts down to the target and stays reached once earned', () => {
+  assert.equal(rewardProgress(base), null);
+  assert.equal(rewardProgress({ ...base, target_days: 30, current_streak: 18, longest_streak: 18 }), '12 days to go');
+  assert.equal(rewardProgress({ ...base, target_days: 30, current_streak: 29, longest_streak: 29 }), '1 day to go');
+  assert.equal(rewardProgress({ ...base, target_days: 30, current_streak: 2, longest_streak: 31 }), 'Reached');
+});
+
+test('forfeitOwed names whoever missed the most recent missed day', () => {
+  const day = (local_date: string, a_done: boolean, b_done: boolean, status: 'missed' | 'complete') => ({
+    local_date, a_done, b_done, together: false, status,
+  });
+  const withForfeit = { ...base, forfeit: 'Coffee' };
+  assert.equal(forfeitOwed({ ...withForfeit, days: [day('2026-01-07', true, true, 'complete')] }, 'a', 'Bela'), null);
+  const missedByB = { ...withForfeit, days: [day('2026-01-09', true, true, 'complete'), day('2026-01-07', true, false, 'missed')] };
+  assert.equal(forfeitOwed(missedByB, 'a', 'Bela'), 'Bela owes');
+  assert.equal(forfeitOwed(missedByB, 'b', 'Asha'), 'You owe');
+  assert.equal(forfeitOwed({ ...withForfeit, days: [day('2026-01-07', false, false, 'missed')] }, 'a', 'Bela'), 'You both owe');
+  assert.equal(forfeitOwed({ ...missedByB, forfeit: null }, 'a', 'Bela'), null);
 });

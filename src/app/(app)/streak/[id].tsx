@@ -14,7 +14,15 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { BigNumber } from '@/components/Tile';
 import { useSession } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
-import { partnerId, scheduleLabel, streakErrorMessage, todayFor, todayLine } from '@/features/streaks/streak';
+import {
+  forfeitOwed,
+  partnerId,
+  rewardProgress,
+  scheduleLabel,
+  streakErrorMessage,
+  todayFor,
+  todayLine,
+} from '@/features/streaks/streak';
 import { useEndStreak, useStreaks } from '@/features/streaks/streaks';
 import { spacing, useColors } from '@/theme/tokens';
 
@@ -84,6 +92,7 @@ export default function StreakScreen() {
   const active = streak.status === 'active';
   const today = todayFor(streak, me, now);
   const iAmA = streak.user_a === me;
+  const owed = forfeitOwed(streak, me, partner);
   // Counted over the days loaded (the latest 60).
   const togetherDays = streak.days.filter((day) => day.together).length;
 
@@ -129,6 +138,27 @@ export default function StreakScreen() {
         ) : null}
         {streak.start_date ? <Row label="Started" value={formatDay(streak.start_date)} /> : null}
       </Card>
+
+      {streak.reward || streak.forfeit ? (
+        <Card>
+          <AppText variant="heading">The deal</AppText>
+          {streak.reward ? (
+            <View>
+              <Row
+                label={streak.target_days ? `Reward at ${streak.target_days} days` : 'Reward'}
+                value={rewardProgress(streak) ?? ''}
+              />
+              <AppText>{streak.reward}</AppText>
+            </View>
+          ) : null}
+          {streak.forfeit ? (
+            <View>
+              <Row label="Forfeit for a missed day" value={owed ?? 'No one owes'} />
+              <AppText>{streak.forfeit}</AppText>
+            </View>
+          ) : null}
+        </Card>
+      ) : null}
 
       <Card>
         <AppText variant="heading">Days</AppText>

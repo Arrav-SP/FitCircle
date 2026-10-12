@@ -23,6 +23,10 @@ export type Streak = {
   start_date: string | null;
   /** Starts on the day it is accepted instead of the day after. */
   start_same_day: boolean;
+  /** The deal: all three are optional and fixed once proposed. */
+  reward: string | null;
+  forfeit: string | null;
+  target_days: number | null;
   current_streak: number;
   longest_streak: number;
   /** Newest first. */
@@ -80,6 +84,28 @@ export function todayLine(today: Today, partnerName: string): string {
   return 'Neither has trained yet today';
 }
 
+export const DEAL_TARGETS = [7, 14, 21, 30, 50, 100];
+
+/** Where the reward stands: "Reached", "12 days to go", or null when the deal has no target. */
+export function rewardProgress(streak: Streak): string | null {
+  if (!streak.target_days) return null;
+  // The best run decides, so a reward once earned stays earned.
+  if (streak.longest_streak >= streak.target_days) return 'Reached';
+  const left = streak.target_days - streak.current_streak;
+  return `${left} ${left === 1 ? 'day' : 'days'} to go`;
+}
+
+/** Who owes the forfeit after the most recent missed day: "You owe", "Bela owes", "You both owe"; null if none. */
+export function forfeitOwed(streak: Streak, me: string, partnerName: string): string | null {
+  const missed = streak.days.find((day) => day.status === 'missed');
+  if (!streak.forfeit || !missed) return null;
+  const iAmA = streak.user_a === me;
+  const iMissed = !(iAmA ? missed.a_done : missed.b_done);
+  const partnerMissed = !(iAmA ? missed.b_done : missed.a_done);
+  if (iMissed && partnerMissed) return 'You both owe';
+  return iMissed ? 'You owe' : `${partnerName} owes`;
+}
+
 /** Days at which the pair's flame steps up. */
 export const FLAME_STEPS = [1, 3, 7, 14, 30, 50, 100];
 
@@ -93,6 +119,8 @@ export function streakErrorMessage(error: unknown): string {
   switch ((error as { message?: string } | null)?.message) {
     case 'streak_exists':
       return 'You already have a streak or a proposal with this friend.';
+    case 'invalid_deal':
+      return 'Keep the reward and the forfeit under 80 characters each.';
     case 'not_friends':
       return 'You are no longer friends, so this streak cannot go ahead.';
     case 'streak_not_pending':

@@ -23,7 +23,7 @@ export function useStreaks() {
       const { data, error } = await supabase
         .from('streak_challenges')
         .select(
-          'id, user_a, user_b, proposer_id, status, timezone, weekdays, min_minutes, start_date, start_same_day, current_streak, longest_streak, streak_days(local_date, a_done, b_done, together, status)',
+          'id, user_a, user_b, proposer_id, status, timezone, weekdays, min_minutes, start_date, start_same_day, reward, forfeit, target_days, current_streak, longest_streak, streak_days(local_date, a_done, b_done, together, status)',
         )
         .order('created_at', { ascending: false })
         .order('local_date', { referencedTable: 'streak_days', ascending: false })
@@ -49,12 +49,23 @@ function useStreakAction<Input>(run: (input: Input) => PromiseLike<{ error: unkn
 }
 
 export function useProposeStreak() {
-  return useStreakAction((input: { friendId: string; weekdays: number[]; minMinutes: number; startSameDay: boolean }) =>
+  return useStreakAction((input: {
+    friendId: string;
+    weekdays: number[];
+    minMinutes: number;
+    startSameDay: boolean;
+    reward: string;
+    forfeit: string;
+    targetDays: number | null;
+  }) =>
     supabase.schema('api').rpc('propose_streak', {
       p_friend_id: input.friendId,
       p_weekdays: input.weekdays,
       p_min_minutes: input.minMinutes,
       p_start_same_day: input.startSameDay,
+      p_reward: input.reward,
+      p_forfeit: input.forfeit,
+      p_target_days: input.targetDays,
     }),
   );
 }
