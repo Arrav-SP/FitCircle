@@ -9,6 +9,7 @@ import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PairRings } from '@/components/PairRings';
 import { Screen } from '@/components/Screen';
+import { StreakFlame } from '@/components/StreakFlame';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { BigNumber } from '@/components/Tile';
 import { useSession } from '@/features/auth/session';
@@ -90,10 +91,13 @@ export default function StreakScreen() {
 
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <BigNumber
-            value={active ? streak.current_streak : streak.longest_streak}
-            unit={(active ? streak.current_streak : streak.longest_streak) === 1 ? 'day' : 'days'}
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <StreakFlame days={active ? streak.current_streak : 0} size={64} />
+            <BigNumber
+              value={active ? streak.current_streak : streak.longest_streak}
+              unit={(active ? streak.current_streak : streak.longest_streak) === 1 ? 'day' : 'days'}
+            />
+          </View>
           {active ? (
             <PairRings
               youDone={today.kind === 'due' && today.youDone}

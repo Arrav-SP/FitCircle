@@ -78,6 +78,14 @@ export function todayLine(today: Today, partnerName: string): string {
   return 'Neither has trained yet today';
 }
 
+/** Days at which the pair's flame steps up. */
+export const FLAME_STEPS = [1, 3, 7, 14, 30, 50, 100];
+
+/** 0 when there is no run (the flame is out), then 1 to 7 as the run passes each step. */
+export function flameLevel(days: number): number {
+  return FLAME_STEPS.filter((step) => days >= step).length;
+}
+
 /** Turns a refusal from the database into a sentence. */
 export function streakErrorMessage(error: unknown): string {
   switch ((error as { message?: string } | null)?.message) {

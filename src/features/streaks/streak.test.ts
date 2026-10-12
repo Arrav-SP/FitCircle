@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { isoWeekday, localDateIn, scheduleLabel, todayFor, todayLine, type Streak } from './streak.ts';
+import { flameLevel, isoWeekday, localDateIn, scheduleLabel, todayFor, todayLine, type Streak } from './streak.ts';
 
 const base: Streak = {
   id: 's',
@@ -51,4 +51,8 @@ test('todayLine names who is still to train', () => {
   assert.equal(todayLine({ kind: 'due', youDone: false, partnerDone: true }, 'Bela'), 'Bela is done. Your turn');
   assert.equal(todayLine({ kind: 'due', youDone: true, partnerDone: true }, 'Bela'), 'Both done today');
   assert.equal(todayLine({ kind: 'rest' }, 'Bela'), 'Rest day');
+});
+
+test('flameLevel steps up at 1, 3, 7, 14, 30, 50 and 100 days', () => {
+  assert.deepEqual([0, 1, 2, 3, 6, 7, 13, 14, 30, 49, 50, 99, 100, 365].map(flameLevel), [0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6, 7, 7]);
 });

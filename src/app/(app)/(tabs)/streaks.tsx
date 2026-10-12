@@ -7,6 +7,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { PairRings } from '@/components/PairRings';
 import { Screen } from '@/components/Screen';
+import { StreakFlame } from '@/components/StreakFlame';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { BigNumber, Tile } from '@/components/Tile';
 import { useSession } from '@/features/auth/session';
@@ -71,7 +72,10 @@ export default function StreaksScreen() {
             accessibilityLabel={`Streak with ${partner}, ${streak.current_streak} days. ${line}`}
             onPress={() => router.push({ pathname: '/streak/[id]', params: { id: streak.id } })}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <BigNumber value={streak.current_streak} unit={streak.current_streak === 1 ? 'day' : 'days'} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                <StreakFlame days={streak.current_streak} size={48} />
+                <BigNumber value={streak.current_streak} unit={streak.current_streak === 1 ? 'day' : 'days'} />
+              </View>
               <PairRings
                 size={44}
                 youDone={today.kind === 'due' && today.youDone}
