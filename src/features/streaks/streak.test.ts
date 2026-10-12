@@ -13,6 +13,7 @@ const base: Streak = {
   weekdays: [1, 3, 5],
   min_minutes: 20,
   start_date: '2026-01-05',
+  start_same_day: false,
   current_streak: 0,
   longest_streak: 0,
   days: [],

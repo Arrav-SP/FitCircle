@@ -1,6 +1,6 @@
 -- Proposing, answering, cancelling and ending a streak, and who may read or change what.
 begin;
-select plan(33);
+select plan(36);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'alice@test.local'),
@@ -127,6 +127,20 @@ select api.respond_streak(current_setting('test.streak')::uuid, false);
 select is(
   (select string_agg(status, ',' order by created_at, status) from public.streak_challenges),
   'cancelled,declined,ended', 'ended, cancelled and declined streaks are all kept as history');
+
+-- A same-day start: the streak begins on the day it is accepted and counts workouts already logged that day.
+select set_config('test.streak', api.propose_streak('00000000-0000-0000-0000-00000000000c', '{1,2,3,4,5,6,7}', 20, true)::text, true);
+reset role;
+insert into public.workouts (id, user_id, title, started_at, duration_minutes) values
+  ('00000000-0000-0000-0000-0000000000f2', '00000000-0000-0000-0000-00000000000a', 'Earlier today', now(), 30);
+select set_config('role', 'authenticated', true), set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000c","role":"authenticated"}', true);
+select lives_ok($$select api.respond_streak(current_setting('test.streak')::uuid, true)$$, 'a same-day proposal is accepted');
+select is(
+  (select start_date from public.streak_challenges where id = current_setting('test.streak')::uuid),
+  (now() at time zone 'Pacific/Auckland')::date, 'a same-day streak starts on the day it is accepted');
+select is(
+  (select a_done || ',' || b_done from public.streak_days where challenge_id = current_setting('test.streak')::uuid),
+  'true,false', 'a workout logged earlier that day already counts');
 
 select * from finish();
 rollback;

@@ -6,12 +6,18 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { NumberStepper } from '@/components/NumberStepper';
 import { Screen } from '@/components/Screen';
+import { SegmentedControl } from '@/components/SegmentedControl';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { useSession } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
 import { partnerId, streakErrorMessage, WEEKDAY_LABELS } from '@/features/streaks/streak';
 import { useProposeStreak, useStreaks } from '@/features/streaks/streaks';
 import { radius, spacing, useColors } from '@/theme/tokens';
+
+const START_OPTIONS = [
+  { value: 'same', label: 'Day they accept' },
+  { value: 'next', label: 'Day after' },
+] as const;
 
 type ChipProps = { label: string; selected: boolean; role: 'radio' | 'checkbox'; onPress: () => void };
 
@@ -49,6 +55,7 @@ export default function NewStreakScreen() {
   const [friendId, setFriendId] = useState<string | null>(null);
   const [weekdays, setWeekdays] = useState<number[]>([1, 3, 5]);
   const [minMinutes, setMinMinutes] = useState(20);
+  const [start, setStart] = useState<'same' | 'next'>('same');
 
   if (friends.isPending || streaks.isPending) {
     return (
@@ -141,9 +148,13 @@ export default function NewStreakScreen() {
         onChange={setMinMinutes}
       />
 
-      <AppText variant="caption" tone="muted">
-        Starts the day after your friend accepts. A day counts when you both log a workout by 3 am the next morning.
-      </AppText>
+      <SegmentedControl
+        label="Starts"
+        hint="A day counts when you both log a workout by 3 am the next morning."
+        options={START_OPTIONS}
+        value={start}
+        onChange={setStart}
+      />
 
       {propose.isError ? (
         <AppText variant="caption" tone="danger" accessibilityRole="alert">
@@ -157,7 +168,10 @@ export default function NewStreakScreen() {
           disabled={propose.isPending || !chosen || weekdays.length === 0}
           onPress={() =>
             chosen &&
-            propose.mutate({ friendId: chosen, weekdays, minMinutes }, { onSuccess: () => router.replace('/streaks') })
+            propose.mutate(
+              { friendId: chosen, weekdays, minMinutes, startSameDay: start === 'same' },
+              { onSuccess: () => router.replace('/streaks') },
+            )
           }
         />
         <Button label="Cancel" variant="secondary" onPress={() => router.replace('/streaks')} />

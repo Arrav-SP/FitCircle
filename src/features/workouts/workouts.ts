@@ -140,6 +140,7 @@ export function useSaveWorkout() {
     onSuccess: () => {
       // A workout can complete or undo a streak day.
       queryClient.invalidateQueries({ queryKey: ['streaks'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
       return queryClient.invalidateQueries({ queryKey: workoutsKey(userId) });
     },
   });
@@ -156,6 +157,7 @@ export function useDeleteWorkout() {
     onSuccess: () => {
       // A workout can complete or undo a streak day.
       queryClient.invalidateQueries({ queryKey: ['streaks'] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
       return queryClient.invalidateQueries({ queryKey: workoutsKey(userId) });
     },
   });

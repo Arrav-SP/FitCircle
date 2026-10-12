@@ -19,6 +19,8 @@ export type Streak = {
   weekdays: number[];
   min_minutes: number;
   start_date: string | null;
+  /** Starts on the day it is accepted instead of the day after. */
+  start_same_day: boolean;
   current_streak: number;
   longest_streak: number;
   /** Newest first. */

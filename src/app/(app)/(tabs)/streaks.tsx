@@ -91,7 +91,8 @@ export default function StreaksScreen() {
             <View>
               <AppText variant="heading">{mine ? `Waiting for ${partner}` : `${partner} wants a streak`}</AppText>
               <AppText variant="caption" tone="muted">
-                {scheduleLabel(streak.weekdays)}, at least {streak.min_minutes} min
+                {scheduleLabel(streak.weekdays)}, at least {streak.min_minutes} min, starts{' '}
+                {streak.start_same_day ? 'on acceptance' : 'the day after acceptance'}
               </AppText>
             </View>
             {mine ? (

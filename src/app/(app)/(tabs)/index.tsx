@@ -11,6 +11,7 @@ import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
 import { Tile } from '@/components/Tile';
 import { WeekStrip } from '@/components/WeekStrip';
+import { Feed } from '@/features/feed/FeedList';
 import { useFriends } from '@/features/friends/friends';
 import { useMyProfile } from '@/features/profile/profile';
 import { partnerId, todayFor, todayLine } from '@/features/streaks/streak';
@@ -60,7 +61,7 @@ export default function HomeScreen() {
         <View style={{ flex: 1 }}>
           <AppText variant="heading">Hi, {firstName}</AppText>
           <AppText variant="caption" tone="muted">
-            {dateLine}
+            {dateLine}. {workoutDays.has(dayKey(today)) ? 'Trained today' : 'No workout yet today'}
           </AppText>
         </View>
       </View>
@@ -113,6 +114,8 @@ export default function HomeScreen() {
       </View>
 
       <Button label="Log a workout" onPress={() => router.push('/workout/new')} />
+
+      <Feed />
     </Screen>
   );
 }

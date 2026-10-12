@@ -72,7 +72,7 @@ Push notifications, offline use, user search, blocking, reporting, rate limits, 
 | STRK-5 | See current streak, longest streak, today's status for both, and day history | Matches the ledger exactly |
 | STRK-6 | Either partner can end the streak | History stays visible to both |
 | FEED-1 | Friends see each workout unless it is hidden; choose per workout | Default is "My friends"; "Only me" hides it. Notes are never included |
-| FEED-2 | Streak milestones (7, 14, 30, 50, 100) appear in the feed for the pair's friends | Each partner's own friends see it only if that partner allows milestone sharing |
+| FEED-2 | Streak milestones (7, 14, 30, 50, 100) appear in the feed for the pair and their friends | A friend sees it unless the partner they know has hidden their activity. Undoing the day that reached it removes it |
 | FEED-3 | Feed of friends' shared items | Shows nothing the viewer is not permitted to see |
 | FEED-4 | Hide a workout later | It disappears for friends on their next refresh |
 | WATR-1 | Add or undo a glass of water; daily total against the goal | One tap |
@@ -226,7 +226,7 @@ Schema changes reach production only through migration files.
 | `metric_entries` | Water and body weight now; steps and sleep later | `id`, `user_id`, `type`, `local_date`, `value`, `source` |
 | `streak_challenges` | Configuration and state | `id`, `user_a`, `user_b`, `proposer_id`, `status`, `timezone`, `weekdays`, `min_minutes`, `start_date`, `current_streak`, `longest_streak`, `last_finalised_date` |
 | `streak_days` | Day ledger | `challenge_id`, `local_date`, `a_done`, `b_done`, `status` (open, complete, missed), `finalised_at` |
-| `shared_events` | What friends may see | `id`, `actor_id`, `kind` (workout, milestone), `workout_id`, `challenge_id`, `summary`, `created_at` |
+| `streak_milestones` | Milestones a streak's best run has reached. Replaces the planned `shared_events`: since friends see workouts by default, the feed reads workouts live and only milestones need a record | `challenge_id`, `milestone`, `reached_at` |
 
 `event_reactions` is added only if the stretch item is built.
 
@@ -284,11 +284,11 @@ Schema changes reach production only through migration files.
 | `workouts`, `workout_exercises`, `workout_sets` | Owner. A friend reads non-hidden workouts only through `api.friend_workouts`, which checks the friendship, the owner's hide-all setting and the owner's per-friend hide list, and leaves out notes; friends have no access to the tables | Owner |
 | `metric_entries` | Owner | Owner |
 | `streak_challenges`, `streak_days` | Either participant | Function only |
-| `shared_events` | Actor, or a current friend of the actor | Function only |
+| `streak_milestones` | No direct access. Read through `api.feed`, which shows friends' non-hidden workouts and the milestones of the caller and of friends who have not hidden their activity; a partner the caller is not connected to is left unnamed | Function only |
 
 A streak partner never reads the other's workouts. They see only the done flags on `streak_days`.
 
-`shared_events.summary` is built by the database from fixed fields (duration, exercise count, milestone number). Workout notes are never copied into it.
+The feed is built by the database from fixed fields (title, duration, exercise names, milestone number). Workout notes are never included.
 
 ### Secrets
 
@@ -324,7 +324,7 @@ Each is tested as allowed for the right user and denied for the wrong one. A den
 
 ### Configuration
 
-Two friends. One to seven agreed weekdays. A minimum workout length (default 20 minutes). The timezone is the proposer's at acceptance and never changes. The streak starts the day after acceptance. Configuration is fixed; to change it, end the streak and start another.
+Two friends. One to seven agreed weekdays. A minimum workout length (default 20 minutes). The timezone is the proposer's at acceptance and never changes. The streak starts on the day the friend accepts or the day after, as the proposer chose; a same-day start counts workouts already logged that day. Configuration is fixed; to change it, end the streak and start another.
 
 ### States
 
