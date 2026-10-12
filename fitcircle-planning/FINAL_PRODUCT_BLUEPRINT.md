@@ -350,7 +350,7 @@ The streak is always derived from the ledger: count consecutive scheduled days b
 
 ### Safety
 
-Every evaluation locks the streak's row first and runs in one transaction. A scheduled job every 15 minutes finalises every due day in date order, so a missed run is caught up by the next.
+Every evaluation locks the streak's row first and runs in one transaction. A scheduled job every 15 minutes finalises every due day in date order, so a missed run is caught up by the next. The app also closes the signed-in user's own due days each time it loads streaks (`api.sync_streaks`), so the numbers are right even if the job is late or unavailable. When a participant deletes their account the streak ends and their id on it is cleared, so the other partner keeps the history.
 
 ### Limit worth stating
 

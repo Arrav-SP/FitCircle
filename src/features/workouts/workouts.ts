@@ -137,7 +137,11 @@ export function useSaveWorkout() {
       const { error } = await supabase.schema('api').rpc('save_workout', { p_workout: payload });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: workoutsKey(userId) }),
+    onSuccess: () => {
+      // A workout can complete or undo a streak day.
+      queryClient.invalidateQueries({ queryKey: ['streaks'] });
+      return queryClient.invalidateQueries({ queryKey: workoutsKey(userId) });
+    },
   });
 }
 
@@ -149,7 +153,11 @@ export function useDeleteWorkout() {
       const { error } = await supabase.from('workouts').delete().eq('id', workoutId);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: workoutsKey(userId) }),
+    onSuccess: () => {
+      // A workout can complete or undo a streak day.
+      queryClient.invalidateQueries({ queryKey: ['streaks'] });
+      return queryClient.invalidateQueries({ queryKey: workoutsKey(userId) });
+    },
   });
 }
 

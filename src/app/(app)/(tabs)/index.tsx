@@ -11,7 +11,10 @@ import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
 import { Tile } from '@/components/Tile';
 import { WeekStrip } from '@/components/WeekStrip';
+import { useFriends } from '@/features/friends/friends';
 import { useMyProfile } from '@/features/profile/profile';
+import { partnerId, todayFor, todayLine } from '@/features/streaks/streak';
+import { useStreaks } from '@/features/streaks/streaks';
 import { useWorkouts } from '@/features/workouts/workouts';
 import { dayKey, shiftWeek, weekDays } from '@/lib/dates';
 import { spacing } from '@/theme/tokens';
@@ -20,6 +23,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const profile = useMyProfile().data;
   const workouts = useWorkouts().data;
+  const streaks = useStreaks().data;
+  const friends = useFriends().data;
   const [today] = useState(() => new Date());
   const [shownWeek, setShownWeek] = useState(today);
   if (!profile) return null;
@@ -37,6 +42,14 @@ export default function HomeScreen() {
     if (onDay.length === 1) router.push(`/workout/${onDay[0].id}`);
     else router.push({ pathname: '/log', params: { day: key } });
   }
+
+  // The tile shows the active streak with the longest current run.
+  const streak = (streaks ?? [])
+    .filter((item) => item.status === 'active')
+    .sort((a, b) => b.current_streak - a.current_streak)[0];
+  const streakToday = streak ? todayFor(streak, profile.id, today) : null;
+  const streakPartner = friends?.find((friend) => streak && friend.id === partnerId(streak, profile.id))?.display_name;
+  const streakLine = streakToday ? todayLine(streakToday, streakPartner ?? 'your partner') : '';
 
   const dateLine = today.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -72,9 +85,18 @@ export default function HomeScreen() {
           <Tile fill title="This week" caption={`${thisWeek} of ${goal} ${goal === 1 ? 'workout' : 'workouts'}`}>
             <ProgressRing value={thisWeek} goal={goal} label={`${thisWeek} of ${goal} workouts this week`} />
           </Tile>
-          <Tile fill title="No streak yet" caption="Starts with a friend" onPress={() => router.push('/streaks')}>
+          <Tile
+            fill
+            title={streak ? ` day streak` : 'No streak yet'}
+            caption={streak ? streakLine : 'Starts with a friend'}
+            onPress={() => router.push('/streaks')}>
             <View style={{ height: 72, justifyContent: 'center' }}>
-              <PairRings size={44} label="You and a partner, neither done today" />
+              <PairRings
+                size={44}
+                youDone={streakToday?.kind === 'due' && streakToday.youDone}
+                partnerDone={streakToday?.kind === 'due' && streakToday.partnerDone}
+                label={streak ? streakLine : 'You and a partner, neither done today'}
+              />
             </View>
           </Tile>
         </View>

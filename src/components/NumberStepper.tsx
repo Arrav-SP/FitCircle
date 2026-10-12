@@ -11,10 +11,12 @@ type Props = {
   min: number;
   max: number;
   unit?: string;
+  /** How much each press changes the value. */
+  stepSize?: number;
   onChange: (value: number) => void;
 };
 
-export function NumberStepper({ label, value, min, max, unit, onChange }: Props) {
+export function NumberStepper({ label, value, min, max, unit, stepSize = 1, onChange }: Props) {
   const colors = useColors();
 
   const step = (delta: number, icon: 'remove' | 'add', name: string) => {
@@ -45,7 +47,7 @@ export function NumberStepper({ label, value, min, max, unit, onChange }: Props)
     <View style={{ gap: spacing.sm }}>
       <AppText variant="label">{label}</AppText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
-        {step(-1, 'remove', 'Decrease')}
+        {step(-stepSize, 'remove', 'Decrease')}
         <View style={{ minWidth: 96, alignItems: 'center' }}>
           <Text
             accessibilityLiveRegion="polite"
@@ -58,7 +60,7 @@ export function NumberStepper({ label, value, min, max, unit, onChange }: Props)
             </AppText>
           ) : null}
         </View>
-        {step(1, 'add', 'Increase')}
+        {step(stepSize, 'add', 'Increase')}
       </View>
     </View>
   );
