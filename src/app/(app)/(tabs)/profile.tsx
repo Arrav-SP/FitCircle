@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 
+import { AccentPicker } from '@/components/AccentPicker';
 import { AppText } from '@/components/AppText';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
@@ -90,6 +91,7 @@ export default function ProfileScreen() {
           value={preference}
           onChange={setPreference}
         />
+        <AccentPicker />
       </Card>
 
       <Button label="Sign out" variant="secondary" onPress={() => signOut()} />

@@ -121,6 +121,8 @@ The colours, as built (`src/theme/tokens.ts` is the source of truth):
 | `success` / `warning` / `danger` | `#1E7A46` / `#8A5A00` / `#C0292B` | `#5BD08A` / `#F0B455` / `#FF8A85` | Status |
 | `border` / `borderStrong` | `#D8DEEA` / `#7C869C` | `#2A2A30` / `#70737F` | Dividers / control outlines |
 
+**Personal colour** (added 14 October 2026): on Profile a person picks one of 19 accent colours, stored on the device. Navy is the default and is the table above. Any other choice replaces `accent`, `textOnAccent`, `accentMuted`, `highlight` and `highlightSoft` with shades derived from its hue: deep on the light theme, pastel on the dark theme. Yellow, orange, coral and brown also switch the partner colour to teal so the two rings stay distinct. On the light theme the page (`bg`), `surfaceSunken`, `border` and `bodyFill` also take a pale tint of the chosen hue, with cards left white; the dark theme stays true black. `src/theme/accents.test.ts` checks every colour in both themes for contrast.
+
 Components read tokens only; no colour or spacing is typed directly into a screen. Every text and background pair was checked for WCAG AA contrast.
 
 ### Components

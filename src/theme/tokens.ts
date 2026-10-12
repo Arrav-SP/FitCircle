@@ -1,5 +1,7 @@
 import { createContext, use } from 'react';
 
+import type { AccentId } from './accents';
+
 // Every text/background pair below was checked for WCAG AA contrast (4.5:1 text, 3:1 graphics).
 // "accent" (navy) is you, "partner" (marigold) is your streak partner; the two meet in the pair rings.
 export const palettes = {
@@ -68,6 +70,9 @@ export type Theme = {
   scheme: Scheme;
   preference: ThemePreference;
   setPreference: (preference: ThemePreference) => void;
+  /** The person's own accent colour; see accents.ts. */
+  accent: AccentId;
+  setAccent: (accent: AccentId) => void;
 };
 
 export const ThemeContext = createContext<Theme>({
@@ -75,6 +80,8 @@ export const ThemeContext = createContext<Theme>({
   scheme: 'light',
   preference: 'system',
   setPreference: () => {},
+  accent: 'navy',
+  setAccent: () => {},
 });
 
 export function useTheme() {
