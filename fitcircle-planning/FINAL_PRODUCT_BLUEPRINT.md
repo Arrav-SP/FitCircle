@@ -72,6 +72,8 @@ Push notifications, offline use, user search, blocking, reporting, rate limits, 
 | STRK-5 | See current streak, longest streak, today's status for both, and day history | Matches the ledger exactly |
 | STRK-6 | Either partner can end the streak | History stays visible to both |
 | PAIR-1 | Do it with me: copy a friend's visible workout into your own new workout | The editor opens prefilled; nothing is saved until Save; the friend's own custom exercises are left out and counted |
+| PAIR-2 | Shared flame: a drawing on each streak that grows as the run passes 1, 3, 7, 14, 30, 50 and 100 days and goes out on a miss | Matches `current_streak` |
+| PAIR-3 | Trained together: a streak day is marked when both partners' qualifying workouts start within 30 minutes of each other | Stored as `streak_days.together`; fixed once the day is finalised; the partner still cannot read the workout |
 | FEED-1 | Friends see each workout unless it is hidden; choose per workout | Default is "My friends"; "Only me" hides it. Notes are never included |
 | FEED-2 | Streak milestones (7, 14, 30, 50, 100) appear in the feed for the pair and their friends | A friend sees it unless the partner they know has hidden their activity. Undoing the day that reached it removes it |
 | FEED-3 | Feed of friends' shared items | Shows nothing the viewer is not permitted to see |
@@ -228,7 +230,7 @@ Schema changes reach production only through migration files.
 | `workout_sets` | A set | `id`, `workout_exercise_id`, `position`, `reps`, `weight_kg` |
 | `metric_entries` | Water and body weight now; steps and sleep later | `id`, `user_id`, `type`, `local_date`, `value`, `source` |
 | `streak_challenges` | Configuration and state | `id`, `user_a`, `user_b`, `proposer_id`, `status`, `timezone`, `weekdays`, `min_minutes`, `start_date`, `current_streak`, `longest_streak`, `last_finalised_date` |
-| `streak_days` | Day ledger | `challenge_id`, `local_date`, `a_done`, `b_done`, `status` (open, complete, missed), `finalised_at` |
+| `streak_days` | Day ledger | `challenge_id`, `local_date`, `a_done`, `b_done`, `together`, `status` (open, complete, missed), `finalised_at` |
 | `streak_milestones` | Milestones a streak's best run has reached. Replaces the planned `shared_events`: since friends see workouts by default, the feed reads workouts live and only milestones need a record | `challenge_id`, `milestone`, `reached_at` |
 
 `event_reactions` is added only if the stretch item is built.

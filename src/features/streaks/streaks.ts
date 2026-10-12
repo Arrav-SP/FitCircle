@@ -23,7 +23,7 @@ export function useStreaks() {
       const { data, error } = await supabase
         .from('streak_challenges')
         .select(
-          'id, user_a, user_b, proposer_id, status, timezone, weekdays, min_minutes, start_date, start_same_day, current_streak, longest_streak, streak_days(local_date, a_done, b_done, status)',
+          'id, user_a, user_b, proposer_id, status, timezone, weekdays, min_minutes, start_date, start_same_day, current_streak, longest_streak, streak_days(local_date, a_done, b_done, together, status)',
         )
         .order('created_at', { ascending: false })
         .order('local_date', { referencedTable: 'streak_days', ascending: false })

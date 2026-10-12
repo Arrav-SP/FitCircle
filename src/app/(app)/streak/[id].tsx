@@ -84,6 +84,8 @@ export default function StreakScreen() {
   const active = streak.status === 'active';
   const today = todayFor(streak, me, now);
   const iAmA = streak.user_a === me;
+  // Counted over the days loaded (the latest 60).
+  const togetherDays = streak.days.filter((day) => day.together).length;
 
   return (
     <Screen>
@@ -122,6 +124,9 @@ export default function StreakScreen() {
         <Row label={active ? 'Best run' : 'Last run'} value={`${active ? streak.longest_streak : streak.current_streak} days`} />
         <Row label="Days" value={scheduleLabel(streak.weekdays)} />
         <Row label="Counts from" value={`${streak.min_minutes} min`} />
+        {togetherDays > 0 ? (
+          <Row label="Trained together" value={`${togetherDays} ${togetherDays === 1 ? 'day' : 'days'}`} />
+        ) : null}
         {streak.start_date ? <Row label="Started" value={formatDay(streak.start_date)} /> : null}
       </Card>
 
@@ -146,6 +151,7 @@ export default function StreakScreen() {
                   {day.status === 'complete'
                     ? label
                     : `${label}: ${youDone ? 'you did' : 'you did not'}, ${partnerDone ? `${partner} did` : `${partner} did not`}`}
+                  {day.together ? ', together' : ''}
                 </AppText>
               </View>
             );

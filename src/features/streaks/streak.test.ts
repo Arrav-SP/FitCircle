@@ -41,7 +41,7 @@ test('todayFor reports before the start, rest days, and each side of a due day',
   assert.deepEqual(todayFor(base, 'a', new Date('2026-01-06T06:00:00Z')), { kind: 'rest' });
   assert.deepEqual(todayFor(base, 'a', monday), { kind: 'due', youDone: false, partnerDone: false });
 
-  const withDay: Streak = { ...base, days: [{ local_date: '2026-01-05', a_done: true, b_done: false, status: 'open' }] };
+  const withDay: Streak = { ...base, days: [{ local_date: '2026-01-05', a_done: true, b_done: false, together: false, status: 'open' }] };
   assert.deepEqual(todayFor(withDay, 'a', monday), { kind: 'due', youDone: true, partnerDone: false });
   assert.deepEqual(todayFor(withDay, 'b', monday), { kind: 'due', youDone: false, partnerDone: true });
 });

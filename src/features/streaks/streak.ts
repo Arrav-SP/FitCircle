@@ -4,6 +4,8 @@ export type StreakDay = {
   local_date: string;
   a_done: boolean;
   b_done: boolean;
+  /** Both workouts started within 30 minutes of each other. */
+  together: boolean;
   status: 'open' | 'complete' | 'missed';
 };
 

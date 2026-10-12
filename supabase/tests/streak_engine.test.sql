@@ -1,6 +1,6 @@
 -- The 17 streak rules from the blueprint, run at fixed clocks. Monday 5 January 2026 is the first day.
 begin;
-select plan(37);
+select plan(41);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'alice@test.local'),
@@ -156,6 +156,33 @@ select '00000000-0000-0000-0000-0000000000c3', d::date, d::date <> '2026-03-08',
 from generate_series('2026-03-02'::date, '2026-03-10'::date, interval '1 day') as d;
 select private.recompute_streak('00000000-0000-0000-0000-0000000000c3');
 select is(pg_temp.nums('c3'), '2/6', '14. six, a miss, then two: current 2, longest 6');
+
+-- Trained together: both qualifying workouts start within 30 minutes of each other.
+create function pg_temp.tog(p_challenge text, p_date date) returns boolean language sql as $$
+  select together from public.streak_days
+  where challenge_id = ('00000000-0000-0000-0000-0000000000' || p_challenge)::uuid and local_date = p_date;
+$$;
+select pg_temp.w('b', '2026-03-12 07:00+05:30', 30);
+select set_config('test.workout', pg_temp.w('c', '2026-03-12 07:20+05:30', 30)::text, true);
+select pg_temp.ev('c3', '2026-03-12', '2026-03-12 09:00+05:30');
+select is(pg_temp.tog('c3', '2026-03-12'), true, 'together: workouts 20 minutes apart are marked together');
+delete from public.workouts where id = current_setting('test.workout')::uuid;
+select pg_temp.ev('c3', '2026-03-12', '2026-03-12 10:00+05:30');
+select is(pg_temp.tog('c3', '2026-03-12'), false, 'together: deleting one of the two workouts clears the mark');
+select pg_temp.w('b', '2026-03-13 07:00+05:30', 30), pg_temp.w('c', '2026-03-13 07:45+05:30', 30), pg_temp.w('c', '2026-03-13 07:10+05:30', 5);
+select pg_temp.ev('c3', '2026-03-13', '2026-03-13 09:00+05:30');
+select is(
+  pg_temp.day('c3', '2026-03-13') || ',' || pg_temp.tog('c3', '2026-03-13'), 'open,true,true,false',
+  'together: 45 minutes apart is a done day but not together, and a too-short workout nearby does not count');
+select pg_temp.w('b', '2026-03-14 18:00+05:30', 30);
+select set_config('test.workout', pg_temp.w('c', '2026-03-14 18:30+05:30', 30)::text, true);
+select pg_temp.ev('c3', '2026-03-14', '2026-03-14 20:00+05:30');
+select pg_temp.fin('c3', '2026-03-15 03:00+05:30');
+delete from public.workouts where id = current_setting('test.workout')::uuid;
+select pg_temp.ev('c3', '2026-03-14', '2026-03-14 21:00+05:30');
+select is(
+  pg_temp.day('c3', '2026-03-14') || ',' || pg_temp.tog('c3', '2026-03-14'), 'complete,true,true,true',
+  'together: exactly 30 minutes apart counts, and a finalised day keeps its mark');
 
 -- 17. A second live streak for the same pair is rejected.
 select throws_ok(
