@@ -61,6 +61,15 @@ export default function NewStreakScreen() {
   const [reward, setReward] = useState('');
   const [forfeit, setForfeit] = useState('');
   const [targetDays, setTargetDays] = useState<number | null>(null);
+  const [custom, setCustom] = useState(false);
+  const [customDays, setCustomDays] = useState('');
+  // The target that will be sent: null for none, undefined while a custom number is missing or not valid.
+  const typed = Number(customDays);
+  const target = !custom ? targetDays : Number.isInteger(typed) && typed >= 2 && typed <= 365 ? typed : undefined;
+  const pickTarget = (days: number | null) => {
+    setCustom(false);
+    setTargetDays(days);
+  };
 
   if (friends.isPending || streaks.isPending) {
     return (
@@ -172,17 +181,29 @@ export default function NewStreakScreen() {
         <View style={{ gap: spacing.sm }}>
           <AppText variant="label">Reward at</AppText>
           <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-            <Chip role="radio" label="No target" selected={targetDays === null} onPress={() => setTargetDays(null)} />
+            <Chip role="radio" label="No target" selected={!custom && targetDays === null} onPress={() => pickTarget(null)} />
             {DEAL_TARGETS.map((days) => (
               <Chip
                 key={days}
                 role="radio"
                 label={`${days} days`}
-                selected={targetDays === days}
-                onPress={() => setTargetDays(days)}
+                selected={!custom && targetDays === days}
+                onPress={() => pickTarget(days)}
               />
             ))}
+            <Chip role="radio" label="Custom" selected={custom} onPress={() => setCustom(true)} />
           </View>
+          {custom ? (
+            <TextField
+              label="Number of days"
+              value={customDays}
+              onChangeText={setCustomDays}
+              inputMode="numeric"
+              maxLength={3}
+              placeholder="45"
+              error={customDays !== '' && target === undefined ? 'Enter a whole number from 2 to 365.' : null}
+            />
+          ) : null}
         </View>
         <TextField
           label="Forfeit for whoever misses a day"
@@ -202,11 +223,11 @@ export default function NewStreakScreen() {
       <View style={{ gap: spacing.md }}>
         <Button
           label={propose.isPending ? 'Sending…' : 'Send proposal'}
-          disabled={propose.isPending || !chosen || weekdays.length === 0}
+          disabled={propose.isPending || !chosen || weekdays.length === 0 || target === undefined}
           onPress={() =>
             chosen &&
             propose.mutate(
-              { friendId: chosen, weekdays, minMinutes, startSameDay: start === 'same', reward, forfeit, targetDays },
+              { friendId: chosen, weekdays, minMinutes, startSameDay: start === 'same', reward, forfeit, targetDays: target ?? null },
               { onSuccess: () => router.replace('/streaks') },
             )
           }

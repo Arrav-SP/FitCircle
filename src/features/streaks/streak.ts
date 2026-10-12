@@ -84,6 +84,7 @@ export function todayLine(today: Today, partnerName: string): string {
   return 'Neither has trained yet today';
 }
 
+/** Suggested reward days; any number from 2 to 365 is allowed. */
 export const DEAL_TARGETS = [7, 14, 21, 30, 50, 100];
 
 /** Where the reward stands: "Reached", "12 days to go", or null when the deal has no target. */
@@ -119,8 +120,14 @@ export function streakErrorMessage(error: unknown): string {
   switch ((error as { message?: string } | null)?.message) {
     case 'streak_exists':
       return 'You already have a streak or a proposal with this friend.';
+    case 'note_exists':
+      return 'You have already sealed a note for this streak.';
+    case 'note_closed':
+      return 'The reward day has passed, so notes are closed.';
+    case 'invalid_note':
+      return 'Write between 1 and 500 characters.';
     case 'invalid_deal':
-      return 'Keep the reward and the forfeit under 80 characters each.';
+      return 'The deal was not accepted. Keep the reward and forfeit under 80 characters, and the reward day between 2 and 365.';
     case 'not_friends':
       return 'You are no longer friends, so this streak cannot go ahead.';
     case 'streak_not_pending':

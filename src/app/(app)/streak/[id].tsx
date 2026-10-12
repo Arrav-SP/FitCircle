@@ -14,6 +14,7 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { BigNumber } from '@/components/Tile';
 import { useSession } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
+import { SealedNotes } from '@/features/streaks/SealedNotes';
 import {
   forfeitOwed,
   partnerId,
@@ -159,6 +160,8 @@ export default function StreakScreen() {
           ) : null}
         </Card>
       ) : null}
+
+      {streak.target_days ? <SealedNotes streak={streak} partnerName={partner} /> : null}
 
       <Card>
         <AppText variant="heading">Days</AppText>
