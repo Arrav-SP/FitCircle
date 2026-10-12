@@ -67,6 +67,8 @@ export type Draft = {
   notes: string;
   hidden: boolean;
   exercises: DraftExercise[];
+  /** Set when the draft was started from a friend's workout. */
+  copiedFrom?: { name: string; skipped: number };
 };
 
 export function emptyDraft(now: Date): Draft {
@@ -191,6 +193,32 @@ export function draftFromWorkout(workout: Workout, units: Units): Draft {
       minutes: exercise.duration_minutes ? String(exercise.duration_minutes) : '',
       sets: setsToDraft(exercise.sets, units),
     })),
+  };
+}
+
+/**
+ * A new draft that starts from a friend's workout: same title, duration, exercises and sets, starting now.
+ * Their own custom exercises cannot be logged by anyone else, so those are left out and counted.
+ * Null when nothing usable is left.
+ */
+export function draftFromFriendWorkout(
+  workout: Workout,
+  friendName: string,
+  usableExerciseIds: ReadonlySet<string>,
+  units: Units,
+  now: Date,
+): Draft | null {
+  const copy = draftFromWorkout(workout, units);
+  const exercises = copy.exercises.filter((exercise) => usableExerciseIds.has(exercise.exercise_id));
+  if (exercises.length === 0) return null;
+  return {
+    ...copy,
+    id: uuid(),
+    startedAt: now.toISOString(),
+    notes: '',
+    hidden: false,
+    exercises,
+    copiedFrom: { name: friendName, skipped: copy.exercises.length - exercises.length },
   };
 }
 

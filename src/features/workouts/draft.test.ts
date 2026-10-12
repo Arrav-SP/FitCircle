@@ -4,12 +4,14 @@ import { test } from 'node:test';
 import { displayToKg, kgToDisplay, uuid } from '../../lib/units.ts';
 import {
   describeSet,
+  draftFromFriendWorkout,
   loadFromSets,
   suggestTitle,
   toPayload,
   validateDraft,
   type Draft,
   type DraftExercise,
+  type Workout,
 } from './draft.ts';
 
 const now = new Date('2026-10-12T12:00:00Z');
@@ -123,4 +125,44 @@ test('loadFromSets and describeSet read saved sets back correctly', () => {
   assert.equal(describeSet({ reps: 12, weight_kg: 0 }, 'kg'), 'Bodyweight × 12');
   assert.equal(describeSet({ reps: 20, weight_kg: null }, 'kg'), '20 reps');
   assert.equal(describeSet({ reps: 1, weight_kg: null }, 'kg'), '1 rep');
+});
+
+const friendWorkout: Workout = {
+  id: 'friend-workout',
+  title: 'Push day',
+  started_at: '2026-10-10T07:00:00Z',
+  duration_minutes: 50,
+  notes: null,
+  hidden: false,
+  exercises: [
+    { exercise_id: 'bench', name: 'Bench Press', muscle_group: 'chest', tracking: 'sets', duration_minutes: null,
+      sets: [{ reps: 8, weight_kg: 60 }, { reps: 6, weight_kg: 65 }] },
+    { exercise_id: 'their-own', name: 'Secret Move', muscle_group: 'abs', tracking: 'sets', duration_minutes: null,
+      sets: [{ reps: 10, weight_kg: null }] },
+    { exercise_id: 'treadmill', name: 'Treadmill Run', muscle_group: 'cardio', tracking: 'duration', duration_minutes: 15, sets: [] },
+  ],
+};
+
+test('draftFromFriendWorkout copies the workout into a new draft that starts now', () => {
+  const copy = draftFromFriendWorkout(friendWorkout, 'Bela', new Set(['bench', 'treadmill', 'their-own']), 'kg', now)!;
+  assert.notEqual(copy.id, friendWorkout.id);
+  assert.equal(copy.title, 'Push day');
+  assert.equal(copy.startedAt, now.toISOString());
+  assert.equal(copy.durationMinutes, '50');
+  assert.deepEqual(copy.exercises[0].sets.map((set) => [set.reps, set.weight]), [['8', '60'], ['6', '65']]);
+  assert.equal(copy.exercises[2].minutes, '15');
+  assert.deepEqual(copy.copiedFrom, { name: 'Bela', skipped: 0 });
+  assert.equal(validateDraft(copy, now), null);
+});
+
+test('draftFromFriendWorkout leaves out exercises the copier cannot log', () => {
+  const copy = draftFromFriendWorkout(friendWorkout, 'Bela', new Set(['bench', 'treadmill']), 'kg', now)!;
+  assert.deepEqual(copy.exercises.map((exercise) => exercise.exercise_id), ['bench', 'treadmill']);
+  assert.equal(copy.copiedFrom?.skipped, 1);
+  assert.equal(draftFromFriendWorkout(friendWorkout, 'Bela', new Set(), 'kg', now), null);
+});
+
+test('draftFromFriendWorkout converts weights to the copier\'s units', () => {
+  const copy = draftFromFriendWorkout(friendWorkout, 'Bela', new Set(['bench']), 'lb', now)!;
+  assert.equal(copy.exercises[0].sets[0].weight, String(kgToDisplay(60, 'lb')));
 });

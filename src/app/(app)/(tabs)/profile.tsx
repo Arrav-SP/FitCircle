@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import { AccentPicker } from '@/components/AccentPicker';
@@ -6,11 +7,12 @@ import { AppText } from '@/components/AppText';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { signOut } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
-import { useMyProfile, useSetHideWorkouts } from '@/features/profile/profile';
+import { useDeleteAccount, useMyProfile, useSetHideWorkouts } from '@/features/profile/profile';
 import { spacing, useTheme } from '@/theme/tokens';
 
 const THEME_OPTIONS = [
@@ -41,6 +43,8 @@ export default function ProfileScreen() {
   const profile = useMyProfile().data;
   const friends = useFriends();
   const setHide = useSetHideWorkouts();
+  const deleteAccount = useDeleteAccount();
+  const [deleting, setDeleting] = useState(false);
   if (!profile) return null;
 
   return (
@@ -94,7 +98,31 @@ export default function ProfileScreen() {
         <AccentPicker />
       </Card>
 
-      <Button label="Sign out" variant="secondary" onPress={() => signOut()} />
+      <View style={{ gap: spacing.md }}>
+        <Button label="Sign out" variant="secondary" onPress={() => signOut()} />
+        <Button
+          label="Delete account"
+          variant="danger"
+          onPress={() => {
+            deleteAccount.reset();
+            setDeleting(true);
+          }}
+        />
+      </View>
+
+      <ConfirmDialog
+        visible={deleting}
+        title="Delete your account?"
+        message={
+          deleteAccount.isError
+            ? 'That did not work. Check your connection and try again.'
+            : 'Your profile, workouts, health entries and friendships are deleted for good, and your streaks end. This cannot be undone.'
+        }
+        confirmLabel="Delete everything"
+        busy={deleteAccount.isPending}
+        onConfirm={() => deleteAccount.mutate()}
+        onCancel={() => setDeleting(false)}
+      />
     </Screen>
   );
 }

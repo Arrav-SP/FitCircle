@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { useSession } from '@/features/auth/session';
+import { signOut, useSession } from '@/features/auth/session';
 import { supabase } from '@/lib/supabase';
 
 export type Units = 'kg' | 'lb';
@@ -97,6 +97,23 @@ export function useSetHideWorkouts() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKey(userId) }),
+  });
+}
+
+/** Deletes the signed-in user's account and everything they own, then signs this device out. Cannot be undone. */
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.schema('api').rpc('delete_account');
+      if (error) throw error;
+      // Things remembered on this device that belonged to the account.
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('fitcircle.') && key !== 'fitcircle.theme' && key !== 'fitcircle.accent') {
+          localStorage.removeItem(key);
+        }
+      }
+      await signOut();
+    },
   });
 }
 

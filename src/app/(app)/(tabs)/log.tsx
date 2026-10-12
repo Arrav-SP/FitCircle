@@ -37,6 +37,11 @@ export default function LogScreen() {
             <DotCalendar today={today} activeDays={workoutDays} />
           </Tile>
           <Tile
+            title="Progress"
+            caption="Workouts per week and your heaviest lifts"
+            onPress={() => router.push('/progress')}
+          />
+          <Tile
             title="Trained muscles"
             caption="See which muscles you worked, by day or week"
             onPress={() => router.push('/muscles')}

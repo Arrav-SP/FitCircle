@@ -162,7 +162,17 @@ export function WorkoutEditor({ heading, initial, units, storageKey, onSaved, on
 
   return (
     <Screen>
-      <AppText variant="title">{heading}</AppText>
+      <View style={{ gap: spacing.xs }}>
+        <AppText variant="title">{heading}</AppText>
+        {draft.copiedFrom ? (
+          <AppText variant="caption" tone="muted">
+            Copied from {draft.copiedFrom.name}. Change anything before saving.
+            {draft.copiedFrom.skipped > 0
+              ? ` ${draft.copiedFrom.skipped} of their own ${draft.copiedFrom.skipped === 1 ? 'exercise was' : 'exercises were'} left out.`
+              : ''}
+          </AppText>
+        ) : null}
+      </View>
 
       <TextField
         label="Name"

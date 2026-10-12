@@ -1,17 +1,20 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { useFriendWorkouts, useFriends } from '@/features/friends/friends';
 import { usePinnedFriends, useTogglePin } from '@/features/friends/pins';
 import { useMyProfile } from '@/features/profile/profile';
-import { describeSet } from '@/features/workouts/draft';
-import { formatWorkoutDate } from '@/features/workouts/workouts';
+import { describeSet, draftFromFriendWorkout, type Workout } from '@/features/workouts/draft';
+import { readStoredDraft } from '@/features/workouts/WorkoutEditor';
+import { formatWorkoutDate, useExercises } from '@/features/workouts/workouts';
 import { spacing } from '@/theme/tokens';
 
 export default function FriendScreen() {
@@ -22,8 +25,14 @@ export default function FriendScreen() {
   const workouts = useFriendWorkouts(id);
   const pinned = usePinnedFriends();
   const togglePin = useTogglePin();
+  const exercises = useExercises();
+  const [replacing, setReplacing] = useState<Workout | null>(null);
+  const [uncopyable, setUncopyable] = useState<string | null>(null);
 
   if (!profile) return null;
+  const units = profile.units;
+  // The same place the new-workout screen keeps an unsaved workout.
+  const draftKey = `fitcircle.workoutDraft.${profile.id}`;
 
   if (friends.isPending || workouts.isPending) {
     return (
@@ -49,6 +58,20 @@ export default function FriendScreen() {
   }
 
   const friend = friends.data.find((item) => item.id === id);
+
+  // Starts a new workout of your own from one of theirs. Nothing is saved until you press Save in the editor.
+  function copy(workout: Workout) {
+    setReplacing(null);
+    const usable = new Set((exercises.data ?? []).map((exercise) => exercise.id));
+    const draft = draftFromFriendWorkout(workout, friend?.display_name ?? '', usable, units, new Date());
+    if (!draft) {
+      setUncopyable(workout.id);
+      return;
+    }
+    localStorage.setItem(draftKey, JSON.stringify(draft));
+    router.push('/workout/new');
+  }
+
   if (!friend) {
     return (
       <Screen centered>
@@ -105,11 +128,31 @@ export default function FriendScreen() {
                 </AppText>
               </View>
             ))}
+            <Button
+              label="Do this workout"
+              variant="secondary"
+              disabled={!exercises.data}
+              onPress={() => (readStoredDraft(draftKey) ? setReplacing(workout) : copy(workout))}
+            />
+            {uncopyable === workout.id ? (
+              <AppText variant="caption" tone="danger" accessibilityRole="alert">
+                This workout only uses {friend.display_name}&apos;s own exercises, so it cannot be copied.
+              </AppText>
+            ) : null}
           </Card>
         ))
       )}
 
       <Button label="Back to Friends" variant="secondary" onPress={() => router.replace('/friends')} />
+
+      <ConfirmDialog
+        visible={replacing !== null}
+        title="Replace your unsaved workout?"
+        message="You have a workout you started and did not save. Copying this one will discard it."
+        confirmLabel="Replace it"
+        onConfirm={() => replacing && copy(replacing)}
+        onCancel={() => setReplacing(null)}
+      />
     </Screen>
   );
 }

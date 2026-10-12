@@ -8,6 +8,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DateTimeField } from '@/components/DateTimeField';
+import { LineChart } from '@/components/LineChart';
 import { Screen } from '@/components/Screen';
 import { ErrorState, Skeleton } from '@/components/States';
 import { TextField } from '@/components/TextField';
@@ -103,6 +104,17 @@ export default function BodyWeightScreen() {
               onPress={submit}
             />
           </Card>
+
+          {entries.length > 1 ? (
+            <Card>
+              <AppText variant="heading">Trend</AppText>
+              <LineChart
+                values={[...entries].reverse().map((entry) => kgToDisplay(entry.kg, units))}
+                format={(value) => `${value} ${units}`}
+                label={`Body weight from ${formatWeight(entries[entries.length - 1].kg, units)} on ${formatDay(entries[entries.length - 1].local_date)} to ${formatWeight(entries[0].kg, units)} on ${formatDay(entries[0].local_date)}`}
+              />
+            </Card>
+          ) : null}
 
           {entries.length > 0 ? (
             <Card>

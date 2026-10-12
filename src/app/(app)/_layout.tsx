@@ -53,6 +53,7 @@ export default function AppLayout() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="muscles" />
         <Stack.Screen name="weight" />
+        <Stack.Screen name="progress" />
         <Stack.Screen name="friends" />
         <Stack.Screen name="friend/[id]" />
         <Stack.Screen name="streak/new" />

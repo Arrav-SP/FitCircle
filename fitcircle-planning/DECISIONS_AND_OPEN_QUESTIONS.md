@@ -22,6 +22,7 @@ Source references such as [S7] point to `SOURCES_AND_VERIFICATION.md`.
 | A10 | Friends see each other's workouts (exercises, sets, duration) by default; each workout has an "Only me" switch. Notes, goals, settings and body weight are never visible to others; non-friends see nothing | Owner, 12 October 2026: seeing each other's training is the point of the app. Replaces "workouts private unless shared" |
 | A11 | Three ways to hide workouts: one workout ("Only me" on the workout), everything from everyone (Profile), everything from chosen friends (eye on the Friends screen). The chosen friend is not told | Owner, 12 October 2026 |
 | A12 | Five tabs: Home, Log, Health, Streaks, Profile. Home holds only today, the week, the best streak, one action and pinned friends. Water and body weight are on Health; the calendar and trained muscles on Log; the activity feed on the Friends screen. Pins are stored per device | Owner, 15 October 2026: no clutter on Home |
+| A13 | Eight features that deepen the pair idea are added after the 20-day scope, built one at a time, smallest first, each tested before the next: Do it with me, Shared flame, Trained together, The deal, Sealed note, Cover pass (only the partner who trained can cover), Weekly pair recap, Dares. Step 8 (real-use fixes, access-rule read-through, backups) follows them | Owner, 13 October 2026: make the app unique around the shared streak |
 
 ## 2. Proposed decisions
 

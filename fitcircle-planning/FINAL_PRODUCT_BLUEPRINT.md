@@ -71,6 +71,7 @@ Push notifications, offline use, user search, blocking, reporting, rate limits, 
 | STRK-4 | A scheduled day counts when both logged a qualifying workout | Rules in section 8 |
 | STRK-5 | See current streak, longest streak, today's status for both, and day history | Matches the ledger exactly |
 | STRK-6 | Either partner can end the streak | History stays visible to both |
+| PAIR-1 | Do it with me: copy a friend's visible workout into your own new workout | The editor opens prefilled; nothing is saved until Save; the friend's own custom exercises are left out and counted |
 | FEED-1 | Friends see each workout unless it is hidden; choose per workout | Default is "My friends"; "Only me" hides it. Notes are never included |
 | FEED-2 | Streak milestones (7, 14, 30, 50, 100) appear in the feed for the pair and their friends | A friend sees it unless the partner they know has hidden their activity. Undoing the day that reached it removes it |
 | FEED-3 | Feed of friends' shared items | Shows nothing the viewer is not permitted to see |
@@ -298,7 +299,7 @@ The app holds only the public Supabase URL and key. The service-role key is not 
 
 ### Account deletion
 
-A database function removes the user's rows and their sign-in record. Whether a database function may delete the sign-in record on hosted Supabase is untested (open question Q3); the fallback is one small edge function.
+`api.delete_account()` deletes the caller's sign-in record; foreign keys remove everything they own, and a trigger ends their streaks first so partners keep the history. Proven on the local stack by `delete_account.test.sql` and an end-to-end run with a real sign-up. Still to confirm once on hosted Supabase (open question Q3); the fallback is one small edge function.
 
 ### Security tests (pgTAP)
 
