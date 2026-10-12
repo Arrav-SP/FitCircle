@@ -5,14 +5,13 @@ import { View } from 'react-native';
 import { AppText } from '@/components/AppText';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
-import { DotCalendar } from '@/components/DotCalendar';
 import { PairRings } from '@/components/PairRings';
 import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
 import { Tile } from '@/components/Tile';
 import { WeekStrip } from '@/components/WeekStrip';
-import { Feed } from '@/features/feed/FeedList';
 import { useFriends } from '@/features/friends/friends';
+import { PinnedFriends } from '@/features/friends/PinnedFriends';
 import { useMyProfile } from '@/features/profile/profile';
 import { partnerId, todayFor, todayLine } from '@/features/streaks/streak';
 import { useStreaks } from '@/features/streaks/streaks';
@@ -20,6 +19,8 @@ import { useWorkouts } from '@/features/workouts/workouts';
 import { dayKey, shiftWeek, weekDays } from '@/lib/dates';
 import { spacing } from '@/theme/tokens';
 
+// Home is kept short on purpose: today, this week, the streak, one action, pinned friends.
+// Water and body weight live on the Health tab; the calendar and trained muscles on Log.
 export default function HomeScreen() {
   const router = useRouter();
   const profile = useMyProfile().data;
@@ -81,41 +82,29 @@ export default function HomeScreen() {
         />
       </View>
 
-      <View style={{ gap: spacing.md }}>
-        <View style={{ flexDirection: 'row', gap: spacing.md }}>
-          <Tile fill title="This week" caption={`${thisWeek} of ${goal} ${goal === 1 ? 'workout' : 'workouts'}`}>
-            <ProgressRing value={thisWeek} goal={goal} label={`${thisWeek} of ${goal} workouts this week`} />
-          </Tile>
-          <Tile
-            fill
-            title={streak ? ` day streak` : 'No streak yet'}
-            caption={streak ? streakLine : 'Starts with a friend'}
-            onPress={() => router.push('/streaks')}>
-            <View style={{ height: 72, justifyContent: 'center' }}>
-              <PairRings
-                size={44}
-                youDone={streakToday?.kind === 'due' && streakToday.youDone}
-                partnerDone={streakToday?.kind === 'due' && streakToday.partnerDone}
-                label={streak ? streakLine : 'You and a partner, neither done today'}
-              />
-            </View>
-          </Tile>
-        </View>
-
-        <Tile title="Workout days" caption="Last 14 weeks">
-          <DotCalendar today={today} activeDays={workoutDays} />
+      <View style={{ flexDirection: 'row', gap: spacing.md }}>
+        <Tile fill title="This week" caption={`${thisWeek} of ${goal} ${goal === 1 ? 'workout' : 'workouts'}`}>
+          <ProgressRing value={thisWeek} goal={goal} label={`${thisWeek} of ${goal} workouts this week`} />
         </Tile>
-
         <Tile
-          title="Trained muscles"
-          caption="See which muscles you worked, by day or week"
-          onPress={() => router.push('/muscles')}
-        />
+          fill
+          title={streak ? `${streak.current_streak} day streak` : 'No streak yet'}
+          caption={streak ? streakLine : 'Starts with a friend'}
+          onPress={() => router.push('/streaks')}>
+          <View style={{ height: 72, justifyContent: 'center' }}>
+            <PairRings
+              size={44}
+              youDone={streakToday?.kind === 'due' && streakToday.youDone}
+              partnerDone={streakToday?.kind === 'due' && streakToday.partnerDone}
+              label={streak ? streakLine : 'You and a partner, neither done today'}
+            />
+          </View>
+        </Tile>
       </View>
 
       <Button label="Log a workout" onPress={() => router.push('/workout/new')} />
 
-      <Feed />
+      <PinnedFriends />
     </Screen>
   );
 }

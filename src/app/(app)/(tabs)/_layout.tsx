@@ -28,6 +28,7 @@ export default function TabsLayout() {
       }}>
       <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: icon('home-outline', 'home') }} />
       <Tabs.Screen name="log" options={{ title: 'Log', tabBarIcon: icon('barbell-outline', 'barbell') }} />
+      <Tabs.Screen name="health" options={{ title: 'Health', tabBarIcon: icon('heart-outline', 'heart') }} />
       <Tabs.Screen name="streaks" options={{ title: 'Streaks', tabBarIcon: icon('flame-outline', 'flame') }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: icon('person-outline', 'person') }} />
     </Tabs>

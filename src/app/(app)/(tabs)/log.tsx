@@ -1,8 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { DotCalendar } from '@/components/DotCalendar';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { Tile } from '@/components/Tile';
@@ -20,11 +22,27 @@ export default function LogScreen() {
     ? new Date(`${day}T00:00`).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
     : null;
   const start = () => router.push('/workout/new');
+  const [today] = useState(() => new Date());
+  const workoutDays = new Set((workouts.data ?? []).map((workout) => dayKey(new Date(workout.started_at))));
 
   return (
     <Screen>
       <AppText variant="title">Log</AppText>
       <Button label="Log a workout" onPress={start} />
+
+      {/* Left out while one day is being shown, so that view stays short. */}
+      {day ? null : (
+        <View style={{ gap: spacing.md }}>
+          <Tile title="Workout days" caption="Last 14 weeks">
+            <DotCalendar today={today} activeDays={workoutDays} />
+          </Tile>
+          <Tile
+            title="Trained muscles"
+            caption="See which muscles you worked, by day or week"
+            onPress={() => router.push('/muscles')}
+          />
+        </View>
+      )}
 
       {workouts.isPending ? (
         <View style={{ gap: spacing.md }}>

@@ -21,7 +21,7 @@ export function Feed() {
 
   return (
     <View style={{ gap: spacing.md }}>
-      <AppText variant="heading">Friends</AppText>
+      <AppText variant="heading">Activity</AppText>
       {feed.isPending ? (
         <Skeleton height={120} />
       ) : feed.isError ? (

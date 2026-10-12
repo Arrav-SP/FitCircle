@@ -77,7 +77,7 @@ Push notifications, offline use, user search, blocking, reporting, rate limits, 
 | FEED-4 | Hide a workout later | It disappears for friends on their next refresh |
 | WATR-1 | Add or undo a glass of water; daily total against the goal | One tap |
 | WGHT-1 | Log body weight for a day, in the user's units; see recent entries | Owner-only; never shown to friends or in the feed |
-| DASH-1 | Today's workout status, water, week progress, streak cards | Updates after each log without a manual refresh |
+| DASH-1 | Home shows today's workout status, week progress, the best active streak and pinned friends with their latest workout; water and body weight are on the Health tab | Updates after each log without a manual refresh |
 | PRIV-1 | Delete account | All of the user's rows are removed and their streaks end |
 | UI-1 | Light, dark and system themes | Both themes pass a contrast check |
 | UI-2 | Every screen has loading, empty and error states | No blank screens or raw error text |
@@ -88,7 +88,7 @@ The interface must look finished. A small scope is not a reason for a rough one.
 
 ### Navigation
 
-Four tabs: **Home** (dashboard and feed), **Log** (new workout, history, progress, water), **Streaks**, **Profile** (friends, invite, settings).
+Five tabs (changed 15 October 2026 to keep Home uncluttered): **Home** (today, week strip, this week, best streak, one action, pinned friends), **Log** (new workout, workout-day calendar, trained muscles, history), **Health** (water, body weight; steps and sleep later; private), **Streaks**, **Profile** (friends, invites, activity feed, settings, appearance). A friend is pinned to Home from their page; pins are remembered per device.
 
 ### Principles
 

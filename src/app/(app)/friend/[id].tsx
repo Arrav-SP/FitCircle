@@ -8,6 +8,7 @@ import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { useFriendWorkouts, useFriends } from '@/features/friends/friends';
+import { usePinnedFriends, useTogglePin } from '@/features/friends/pins';
 import { useMyProfile } from '@/features/profile/profile';
 import { describeSet } from '@/features/workouts/draft';
 import { formatWorkoutDate } from '@/features/workouts/workouts';
@@ -19,6 +20,8 @@ export default function FriendScreen() {
   const profile = useMyProfile().data;
   const friends = useFriends();
   const workouts = useFriendWorkouts(id);
+  const pinned = usePinnedFriends();
+  const togglePin = useTogglePin();
 
   if (!profile) return null;
 
@@ -68,6 +71,12 @@ export default function FriendScreen() {
           <AppText tone="muted">@{friend.username}</AppText>
         </View>
       </View>
+
+      <Button
+        label={pinned.includes(friend.id) ? 'Unpin from Home' : 'Pin to Home'}
+        variant="secondary"
+        onPress={() => togglePin.mutate(friend.id)}
+      />
 
       {workouts.data.length === 0 ? (
         <EmptyState

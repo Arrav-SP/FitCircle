@@ -21,6 +21,7 @@ Source references such as [S7] point to `SOURCES_AND_VERIFICATION.md`.
 | A9 | No implementation until the owner explicitly approves | Owner's instruction |
 | A10 | Friends see each other's workouts (exercises, sets, duration) by default; each workout has an "Only me" switch. Notes, goals, settings and body weight are never visible to others; non-friends see nothing | Owner, 12 October 2026: seeing each other's training is the point of the app. Replaces "workouts private unless shared" |
 | A11 | Three ways to hide workouts: one workout ("Only me" on the workout), everything from everyone (Profile), everything from chosen friends (eye on the Friends screen). The chosen friend is not told | Owner, 12 October 2026 |
+| A12 | Five tabs: Home, Log, Health, Streaks, Profile. Home holds only today, the week, the best streak, one action and pinned friends. Water and body weight are on Health; the calendar and trained muscles on Log; the activity feed on the Friends screen. Pins are stored per device | Owner, 15 October 2026: no clutter on Home |
 
 ## 2. Proposed decisions
 
@@ -41,7 +42,7 @@ Source references such as [S7] point to `SOURCES_AND_VERIFICATION.md`.
 | P13 | Development on the local Supabase stack; one free hosted project for the group | Two hosted projects | Keeps test data away from real data (see Q1) |
 | P14 | One `metric_entries` table for water, steps and sleep | A table per metric | Same shape and rules |
 | P15 | Weekly manual database dump, and one before each migration | No backups | The free tier has none [S25] |
-| P16 | Four tabs: Home, Log, Streaks, Profile | Five tabs | Enough for this scope |
+| P16 | Superseded by A12 | — | — |
 
 ## 3. Open questions that block building
 

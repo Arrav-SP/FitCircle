@@ -17,6 +17,8 @@ import {
   useRemoveFriend,
   useSetHiddenFrom,
 } from '@/features/friends/friends';
+import { Feed } from '@/features/feed/FeedList';
+import { usePinnedFriends, useTogglePin } from '@/features/friends/pins';
 import type { Profile } from '@/features/profile/profile';
 import { radius, spacing, useColors } from '@/theme/tokens';
 
@@ -26,6 +28,8 @@ export default function FriendsScreen() {
   const friends = useFriends();
   const createInvite = useCreateInvite();
   const hiddenFrom = useHiddenFrom();
+  const pinned = usePinnedFriends();
+  const togglePin = useTogglePin();
   const setHiddenFrom = useSetHiddenFrom();
   const removeFriend = useRemoveFriend();
   const [removing, setRemoving] = useState<Profile | null>(null);
@@ -130,6 +134,18 @@ export default function FriendsScreen() {
                 </Pressable>
                 <Pressable
                   accessibilityRole="switch"
+                  accessibilityLabel={`Pin ${friend.display_name} to Home`}
+                  accessibilityState={{ checked: pinned.includes(friend.id) }}
+                  onPress={() => togglePin.mutate(friend.id)}
+                  style={{ width: 44, height: 48, justifyContent: 'center', alignItems: 'center' }}>
+                  <Ionicons
+                    name={pinned.includes(friend.id) ? 'pin' : 'pin-outline'}
+                    size={22}
+                    color={pinned.includes(friend.id) ? colors.accent : colors.text}
+                  />
+                </Pressable>
+                <Pressable
+                  accessibilityRole="switch"
                   accessibilityLabel={`Hide my workouts from ${friend.display_name}`}
                   accessibilityState={{ checked: hidden }}
                   disabled={!hiddenFrom.data || setHiddenFrom.isPending}
@@ -156,6 +172,8 @@ export default function FriendsScreen() {
           })}
         </Card>
       )}
+
+      {friends.data && friends.data.length > 0 ? <Feed /> : null}
 
       <Button label="Back to Profile" variant="secondary" onPress={() => router.replace('/profile')} />
 

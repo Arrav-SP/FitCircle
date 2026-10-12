@@ -178,7 +178,7 @@ export default function TrainedMusclesScreen() {
       )}
 
       <SegmentedControl label="Figure" options={FIGURE_OPTIONS} value={figure} onChange={setFigure} />
-      <Button label="Back to Home" variant="secondary" onPress={() => router.replace('/')} />
+      <Button label="Back to Log" variant="secondary" onPress={() => router.replace('/log')} />
     </Screen>
   );
 }
