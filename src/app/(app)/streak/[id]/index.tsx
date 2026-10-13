@@ -214,6 +214,11 @@ export default function StreakScreen() {
       </Card>
 
       <View style={{ gap: spacing.md }}>
+        <Button
+          label="Weekly recap"
+          variant="secondary"
+          onPress={() => router.push({ pathname: '/streak/[id]/recap', params: { id: streak.id } })}
+        />
         {active ? (
           <Button
             label="End streak"

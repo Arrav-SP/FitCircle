@@ -100,12 +100,63 @@ export function canCover(streak: Streak, day: StreakDay, me: string, now: Date):
   if (!iDid || partnerDid) return false;
 
   const timezone = streak.timezone ?? 'UTC';
-  const closes = new Date(`${day.local_date}T00:00:00Z`);
-  closes.setUTCDate(closes.getUTCDate() + 2);
-  const lastDay = closes.toISOString().slice(0, 10);
+  const lastDay = addDays(day.local_date, 2);
   const today = localDateIn(timezone, now);
   const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: timezone, hour: '2-digit', hourCycle: 'h23' }).format(now));
   return today < lastDay || (today === lastDay && hour < 3);
+}
+
+/** A YYYY-MM-DD date moved by whole days. */
+export function addDays(date: string, days: number): string {
+  const moved = new Date(`${date}T00:00:00Z`);
+  moved.setUTCDate(moved.getUTCDate() + days);
+  return moved.toISOString().slice(0, 10);
+}
+
+/** Monday of the week containing the date. */
+export function weekStartOf(date: string): string {
+  return addDays(date, 1 - isoWeekday(date));
+}
+
+/** rest: no ledger row, so a day off, a day before the start, or a day still to come. */
+export type RecapDay = 'both' | 'covered' | 'you' | 'partner' | 'none' | 'rest';
+
+export type WeekRecap = {
+  weekStart: string;
+  weekEnd: string;
+  /** Monday to Sunday. */
+  days: RecapDay[];
+  /** Days both trained. */
+  both: number;
+  you: number;
+  partner: number;
+  together: number;
+  covered: number;
+};
+
+/** One Monday-to-Sunday week of a streak, from the day ledger. No minutes: a partner's workouts are not readable. */
+export function weekRecap(streak: Streak, me: string, weekStart: string): WeekRecap {
+  const iAmA = streak.user_a === me;
+  const recap: WeekRecap = { weekStart, weekEnd: addDays(weekStart, 6), days: [], both: 0, you: 0, partner: 0, together: 0, covered: 0 };
+  for (let offset = 0; offset < 7; offset += 1) {
+    const date = addDays(weekStart, offset);
+    const day = streak.days.find((item) => item.local_date === date);
+    if (!day) {
+      recap.days.push('rest');
+      continue;
+    }
+    const youDone = iAmA ? day.a_done : day.b_done;
+    const partnerDone = iAmA ? day.b_done : day.a_done;
+    if (youDone) recap.you += 1;
+    if (partnerDone) recap.partner += 1;
+    if (youDone && partnerDone) recap.both += 1;
+    if (day.together) recap.together += 1;
+    if (day.status === 'covered') recap.covered += 1;
+    recap.days.push(
+      day.status === 'covered' ? 'covered' : youDone && partnerDone ? 'both' : youDone ? 'you' : partnerDone ? 'partner' : 'none',
+    );
+  }
+  return recap;
 }
 
 /** Suggested reward days; any number from 2 to 365 is allowed. */

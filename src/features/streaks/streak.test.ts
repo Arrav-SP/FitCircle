@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { canCover, flameLevel, forfeitOwed, isoWeekday, localDateIn, rewardProgress, scheduleLabel, todayFor, todayLine, type Streak } from './streak.ts';
+import { canCover, flameLevel, forfeitOwed, isoWeekday, localDateIn, rewardProgress, scheduleLabel, todayFor, todayLine, weekRecap, weekStartOf, type Streak, type StreakDay } from './streak.ts';
 
 const base: Streak = {
   id: 's',
@@ -94,4 +94,39 @@ test('canCover is offered only to the partner who trained, with a pass, inside 2
   assert.equal(canCover(withPass, { ...missed, a_done: false }, 'a', inTime), false, 'both missed');
   assert.equal(canCover(withPass, { ...missed, status: 'covered' }, 'a', inTime), false, 'already covered');
   assert.equal(canCover({ ...withPass, status: 'ended' }, missed, 'a', inTime), false, 'ended streak');
+});
+
+test('weekStartOf finds the Monday, across a month boundary too', () => {
+  assert.equal(weekStartOf('2026-01-05'), '2026-01-05');
+  assert.equal(weekStartOf('2026-01-11'), '2026-01-05');
+  assert.equal(weekStartOf('2026-02-01'), '2026-01-26');
+});
+
+test('weekRecap counts one week from each side and ignores other weeks', () => {
+  const day = (local_date: string, a_done: boolean, b_done: boolean, status: StreakDay['status'], together = false): StreakDay =>
+    ({ local_date, a_done, b_done, together, status });
+  const streak = {
+    ...base,
+    days: [
+      day('2026-01-12', true, true, 'complete'), // the week after
+      day('2026-01-09', true, false, 'open'),
+      day('2026-01-08', false, false, 'missed'),
+      day('2026-01-07', true, false, 'covered'),
+      day('2026-01-06', false, true, 'missed'),
+      day('2026-01-05', true, true, 'complete', true),
+      day('2026-01-04', true, true, 'complete'), // the week before
+    ],
+  };
+  assert.deepEqual(weekRecap(streak, 'a', '2026-01-05'), {
+    weekStart: '2026-01-05',
+    weekEnd: '2026-01-11',
+    days: ['both', 'partner', 'covered', 'none', 'you', 'rest', 'rest'],
+    both: 1,
+    you: 3,
+    partner: 2,
+    together: 1,
+    covered: 1,
+  });
+  const fromB = weekRecap(streak, 'b', '2026-01-05');
+  assert.deepEqual([fromB.you, fromB.partner, fromB.days[1], fromB.days[4]], [2, 3, 'you', 'partner']);
 });
