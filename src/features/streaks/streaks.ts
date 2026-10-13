@@ -23,7 +23,7 @@ export function useStreaks() {
       const { data, error } = await supabase
         .from('streak_challenges')
         .select(
-          'id, user_a, user_b, proposer_id, status, timezone, weekdays, min_minutes, start_date, start_same_day, reward, forfeit, target_days, current_streak, longest_streak, streak_days(local_date, a_done, b_done, together, status)',
+          'id, user_a, user_b, proposer_id, status, timezone, weekdays, min_minutes, start_date, start_same_day, reward, forfeit, target_days, current_streak, longest_streak, cover_passes, streak_days(local_date, a_done, b_done, together, status)',
         )
         .order('created_at', { ascending: false })
         .order('local_date', { referencedTable: 'streak_days', ascending: false })
@@ -82,4 +82,11 @@ export function useCancelStreak() {
 
 export function useEndStreak() {
   return useStreakAction((id: string) => supabase.schema('api').rpc('end_streak', { p_challenge_id: id }));
+}
+
+/** Spends a cover pass on a day your partner missed and you trained. */
+export function useCoverDay() {
+  return useStreakAction((input: { id: string; date: string }) =>
+    supabase.schema('api').rpc('cover_day', { p_challenge_id: input.id, p_date: input.date }),
+  );
 }

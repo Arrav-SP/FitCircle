@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { flameLevel, forfeitOwed, isoWeekday, localDateIn, rewardProgress, scheduleLabel, todayFor, todayLine, type Streak } from './streak.ts';
+import { canCover, flameLevel, forfeitOwed, isoWeekday, localDateIn, rewardProgress, scheduleLabel, todayFor, todayLine, type Streak } from './streak.ts';
 
 const base: Streak = {
   id: 's',
@@ -19,6 +19,7 @@ const base: Streak = {
   target_days: null,
   current_streak: 0,
   longest_streak: 0,
+  cover_passes: 0,
   days: [],
 };
 
@@ -78,4 +79,19 @@ test('forfeitOwed names whoever missed the most recent missed day', () => {
   assert.equal(forfeitOwed(missedByB, 'b', 'Asha'), 'You owe');
   assert.equal(forfeitOwed({ ...withForfeit, days: [day('2026-01-07', false, false, 'missed')] }, 'a', 'Bela'), 'You both owe');
   assert.equal(forfeitOwed({ ...missedByB, forfeit: null }, 'a', 'Bela'), null);
+});
+
+test('canCover is offered only to the partner who trained, with a pass, inside 24 hours', () => {
+  const missed = { local_date: '2026-01-12', a_done: true, b_done: false, together: false, status: 'missed' as const };
+  const withPass = { ...base, cover_passes: 1 };
+  // The day closes at 03:00 on the 13th in India and can be covered until 03:00 on the 14th (21:30 UTC on the 13th).
+  const inTime = new Date('2026-01-13T21:29:00Z');
+  const tooLate = new Date('2026-01-13T21:30:00Z');
+  assert.equal(canCover(withPass, missed, 'a', inTime), true);
+  assert.equal(canCover(withPass, missed, 'a', tooLate), false);
+  assert.equal(canCover(withPass, missed, 'b', inTime), false, 'not your own miss');
+  assert.equal(canCover(base, missed, 'a', inTime), false, 'no pass');
+  assert.equal(canCover(withPass, { ...missed, a_done: false }, 'a', inTime), false, 'both missed');
+  assert.equal(canCover(withPass, { ...missed, status: 'covered' }, 'a', inTime), false, 'already covered');
+  assert.equal(canCover({ ...withPass, status: 'ended' }, missed, 'a', inTime), false, 'ended streak');
 });

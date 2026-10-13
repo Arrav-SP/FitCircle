@@ -6,7 +6,8 @@ export type StreakDay = {
   b_done: boolean;
   /** Both workouts started within 30 minutes of each other. */
   together: boolean;
-  status: 'open' | 'complete' | 'missed';
+  /** covered: missed by one partner and saved by the other with a cover pass. */
+  status: 'open' | 'complete' | 'missed' | 'covered';
 };
 
 export type Streak = {
@@ -29,6 +30,8 @@ export type Streak = {
   target_days: number | null;
   current_streak: number;
   longest_streak: number;
+  /** Earned one per 7 completed days, less those spent. */
+  cover_passes: number;
   /** Newest first. */
   days: StreakDay[];
 };
@@ -84,6 +87,27 @@ export function todayLine(today: Today, partnerName: string): string {
   return 'Neither has trained yet today';
 }
 
+/**
+ * Whether the signed-in person can spend a cover pass on this day: it was missed, they trained and their
+ * partner did not, a pass is in hand, and it is within 24 hours of the day closing (03:00 two mornings
+ * later, in the streak's timezone). The database decides for real; this only chooses when to show the button.
+ */
+export function canCover(streak: Streak, day: StreakDay, me: string, now: Date): boolean {
+  if (streak.status !== 'active' || day.status !== 'missed' || streak.cover_passes < 1) return false;
+  const iAmA = streak.user_a === me;
+  const iDid = iAmA ? day.a_done : day.b_done;
+  const partnerDid = iAmA ? day.b_done : day.a_done;
+  if (!iDid || partnerDid) return false;
+
+  const timezone = streak.timezone ?? 'UTC';
+  const closes = new Date(`${day.local_date}T00:00:00Z`);
+  closes.setUTCDate(closes.getUTCDate() + 2);
+  const lastDay = closes.toISOString().slice(0, 10);
+  const today = localDateIn(timezone, now);
+  const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: timezone, hour: '2-digit', hourCycle: 'h23' }).format(now));
+  return today < lastDay || (today === lastDay && hour < 3);
+}
+
 /** Suggested reward days; any number from 2 to 365 is allowed. */
 export const DEAL_TARGETS = [7, 14, 21, 30, 50, 100];
 
@@ -120,6 +144,13 @@ export function streakErrorMessage(error: unknown): string {
   switch ((error as { message?: string } | null)?.message) {
     case 'streak_exists':
       return 'You already have a streak or a proposal with this friend.';
+    case 'no_pass':
+      return 'You have no cover pass left.';
+    case 'cover_too_late':
+      return 'It is more than 24 hours since that day closed, so it can no longer be covered.';
+    case 'cannot_cover':
+    case 'day_not_missed':
+      return 'This day cannot be covered.';
     case 'note_exists':
       return 'You have already sealed a note for this streak.';
     case 'note_closed':
