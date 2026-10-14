@@ -19,6 +19,10 @@ export type Settings = {
 
 export type ProfileInput = { username: string; display_name: string } & Settings;
 
+/** One switch per kind of push notification; all on until switched off. */
+export type NotifyKey = 'notify_partner' | 'notify_reminders' | 'notify_requests' | 'notify_reactions';
+type NotifySettings = Record<NotifyKey, boolean>;
+
 export const USERNAME_PATTERN = /^[A-Za-z0-9_]{3,20}$/;
 
 const profileKey = (userId: string | undefined) => ['profile', userId];
@@ -29,10 +33,12 @@ export function useMyProfile() {
   return useQuery({
     queryKey: profileKey(userId),
     enabled: !!userId,
-    queryFn: async (): Promise<(Profile & Settings & { hide_workouts: boolean }) | null> => {
+    queryFn: async (): Promise<(Profile & Settings & NotifySettings & { hide_workouts: boolean }) | null> => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, username, display_name, user_private(units, weekly_workout_goal, water_goal, hide_workouts)')
+        .select(
+          'id, username, display_name, user_private(units, weekly_workout_goal, water_goal, hide_workouts, notify_partner, notify_reminders, notify_requests, notify_reactions)',
+        )
         .eq('id', userId!)
         .maybeSingle();
       if (error) throw error;
@@ -94,6 +100,19 @@ export function useSetHideWorkouts() {
   return useMutation({
     mutationFn: async (hide: boolean) => {
       const { error } = await supabase.from('user_private').update({ hide_workouts: hide }).eq('user_id', userId!);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKey(userId) }),
+  });
+}
+
+/** Switches kinds of notification on or off for the account (every device): one kind, or all at once. */
+export function useSetNotify() {
+  const queryClient = useQueryClient();
+  const userId = useSession().session?.user.id;
+  return useMutation({
+    mutationFn: async (changes: Partial<NotifySettings>) => {
+      const { error } = await supabase.from('user_private').update(changes).eq('user_id', userId!);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKey(userId) }),

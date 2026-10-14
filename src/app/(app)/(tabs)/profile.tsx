@@ -13,6 +13,7 @@ import { SegmentedControl } from '@/components/SegmentedControl';
 import { InstallCard } from '@/features/app/InstallCard';
 import { signOut } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
+import { NotificationsCard } from '@/features/notifications/NotificationsCard';
 import { useDeleteAccount, useMyProfile, useSetHideWorkouts } from '@/features/profile/profile';
 import { spacing, useTheme } from '@/theme/tokens';
 
@@ -89,6 +90,8 @@ export default function ProfileScreen() {
           onChange={(value) => setHide.mutate(value === 'me')}
         />
       </Card>
+
+      <NotificationsCard />
 
       <Card>
         <SegmentedControl

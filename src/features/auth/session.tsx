@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, use, useEffect, useState, type PropsWithChildren } from 'react';
 
+import { forgetThisDevice } from '@/features/notifications/device';
 import { isIdleExpired } from '@/lib/idle';
 import { queryClient } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
@@ -68,6 +69,8 @@ export function signInWithGoogle() {
 }
 
 export async function signOut() {
+  // Stop this device getting the account's notifications; never let that block signing out.
+  await forgetThisDevice().catch(() => undefined);
   await supabase.auth.signOut();
   // Drop cached data so the next person on this device never sees it.
   queryClient.clear();
