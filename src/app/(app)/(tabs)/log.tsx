@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -7,7 +6,7 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { DotCalendar } from '@/components/DotCalendar';
 import { Screen } from '@/components/Screen';
-import { BigNumber, Tile } from '@/components/Tile';
+import { BigNumber, Tile, TileIcon } from '@/components/Tile';
 import { useMyProfile } from '@/features/profile/profile';
 import { muscleTotals } from '@/features/workouts/muscles';
 import { weeklyCounts } from '@/features/workouts/progress';
@@ -53,7 +52,7 @@ export default function LogScreen() {
           {musclesThisWeek > 0 ? (
             <BigNumber value={musclesThisWeek} unit={musclesThisWeek === 1 ? 'muscle' : 'muscles'} />
           ) : (
-            <Ionicons name="body-outline" size={40} color={colors.accent} />
+            <TileIcon name="body-outline" />
           )}
         </Tile>
       </View>

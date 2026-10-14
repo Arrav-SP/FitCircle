@@ -29,7 +29,7 @@ export default function HealthScreen() {
   const weightCaption = weights.isError
     ? 'Did not load. Tap to try again'
     : latest
-      ? [formatDay(latest.local_date), weightChange(latest.kg, previous?.kg, profile.units)].filter(Boolean).join(', ')
+      ? [formatDay(latest.local_date), weightChange(latest.kg, previous?.kg, profile.units)?.toLowerCase()].filter(Boolean).join(', ')
       : 'Tap to log your weight';
 
   return (

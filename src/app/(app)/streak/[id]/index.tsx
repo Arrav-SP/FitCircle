@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
@@ -10,8 +9,9 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PairRings } from '@/components/PairRings';
 import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
+import { StatGrid } from '@/components/StatGrid';
 import { StreakFlame } from '@/components/StreakFlame';
-import { BigNumber, Tile } from '@/components/Tile';
+import { BigNumber, Tile, TileIcon } from '@/components/Tile';
 import { DayDots } from '@/features/streaks/DayDots';
 import { notesSummary, useStreakNotes } from '@/features/streaks/SealedNotes';
 import {
@@ -21,7 +21,6 @@ import {
   isoWeekday,
   lastDays,
   localDateIn,
-  scheduleLabel,
   streakErrorMessage,
   todayFor,
   todayLine,
@@ -31,10 +30,9 @@ import {
 } from '@/features/streaks/streak';
 import { Row, StreakLoader, type LoadedStreak } from '@/features/streaks/StreakScreen';
 import { useDares, useEndStreak } from '@/features/streaks/streaks';
-import { spacing, useColors } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 
-const formatDay = (date: string) =>
-  new Date(`${date}T00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+const shortDay = (date: string) => new Date(`${date}T00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 
 const SECTIONS = {
   deal: '/streak/[id]/deal',
@@ -49,7 +47,6 @@ export default function StreakScreen() {
 }
 
 function StreakOverview({ streak, partner, me }: LoadedStreak) {
-  const colors = useColors();
   const router = useRouter();
   const end = useEndStreak();
   const dares = useDares(streak.id);
@@ -81,7 +78,7 @@ function StreakOverview({ streak, partner, me }: LoadedStreak) {
         {streak.target_days && !reached ? (
           <BigNumber value={streak.target_days - streak.current_streak} unit="to go" />
         ) : (
-          <Ionicons name={reached ? 'trophy' : 'ribbon-outline'} size={40} color={colors.accent} />
+          <TileIcon name={reached ? 'trophy-outline' : 'ribbon-outline'} />
         )}
       </Tile>,
     );
@@ -110,11 +107,7 @@ function StreakOverview({ streak, partner, me }: LoadedStreak) {
         caption={summary}
         captionTone={summary === 'Write yours' ? 'accent' : 'muted'}
         onPress={() => open('notes')}>
-        <Ionicons
-          name={notes.data?.open ? 'lock-open-outline' : notes.data?.mine ? 'lock-closed' : 'create-outline'}
-          size={40}
-          color={colors.accent}
-        />
+        <TileIcon name={notes.data?.open ? 'lock-open-outline' : notes.data?.mine ? 'lock-closed-outline' : 'create-outline'} />
       </Tile>,
     );
   }
@@ -174,16 +167,16 @@ function StreakOverview({ streak, partner, me }: LoadedStreak) {
       </Card>
 
       <Card>
-        <Row label={active ? 'Best run' : 'Last run'} value={`${active ? streak.longest_streak : streak.current_streak} days`} />
-        <Row label="Days" value={scheduleLabel(streak.weekdays)} />
-        <Row label="Counts from" value={`${streak.min_minutes} min`} />
-        {active ? (
-          <Row label="Cover passes" value={streak.cover_passes > 0 ? String(streak.cover_passes) : 'None yet'} />
-        ) : null}
-        {togetherDays > 0 ? (
-          <Row label="Trained together" value={`${togetherDays} ${togetherDays === 1 ? 'day' : 'days'}`} />
-        ) : null}
-        {streak.start_date ? <Row label="Started" value={formatDay(streak.start_date)} /> : null}
+        <StatGrid
+          stats={[
+            { value: String(active ? streak.longest_streak : streak.current_streak), label: active ? 'best run' : 'last run' },
+            ...(active ? [{ value: String(streak.cover_passes), label: streak.cover_passes === 1 ? 'cover pass' : 'cover passes' }] : []),
+            { value: String(togetherDays), label: togetherDays === 1 ? 'day together' : 'days together' },
+            { value: streak.weekdays.length === 7 ? 'Daily' : String(streak.weekdays.length), label: streak.weekdays.length === 7 ? 'schedule' : 'days a week' },
+            { value: String(streak.min_minutes), label: 'min to count' },
+            ...(streak.start_date ? [{ value: shortDay(streak.start_date), label: 'started' }] : []),
+          ]}
+        />
       </Card>
 
       {rows.map((row, index) => (

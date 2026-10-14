@@ -5,10 +5,9 @@ import { View } from 'react-native';
 import { AppText } from '@/components/AppText';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
-import { PairRings } from '@/components/PairRings';
-import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
-import { Tile } from '@/components/Tile';
+import { StreakFlame } from '@/components/StreakFlame';
+import { BigNumber, Tile, TileBar, TileIcon } from '@/components/Tile';
 import { WeekStrip } from '@/components/WeekStrip';
 import { useFriends } from '@/features/friends/friends';
 import { PinnedFriends } from '@/features/friends/PinnedFriends';
@@ -83,22 +82,29 @@ export default function HomeScreen() {
       </View>
 
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
-        <Tile fill title="This week" caption={`${thisWeek} of ${goal} ${goal === 1 ? 'workout' : 'workouts'}`}>
-          <ProgressRing value={thisWeek} goal={goal} label={`${thisWeek} of ${goal} workouts this week`} />
+        <Tile
+          fill
+          title="This week"
+          caption={thisWeek >= goal ? 'Goal reached' : `${goal - thisWeek} more to reach your goal`}
+          accessibilityLabel={`This week: ${thisWeek} of ${goal} workouts`}>
+          <View style={{ gap: spacing.sm }}>
+            <BigNumber value={thisWeek} unit={`of ${goal}`} />
+            <TileBar value={thisWeek} goal={goal} />
+          </View>
         </Tile>
         <Tile
           fill
-          title={streak ? `${streak.current_streak} day streak` : 'No streak yet'}
+          title={streak ? 'Streak' : 'No streak yet'}
           caption={streak ? streakLine : 'Starts with a friend'}
           onPress={() => router.push('/streaks')}>
-          <View style={{ height: 72, justifyContent: 'center' }}>
-            <PairRings
-              size={44}
-              youDone={streakToday?.kind === 'due' && streakToday.youDone}
-              partnerDone={streakToday?.kind === 'due' && streakToday.partnerDone}
-              label={streak ? streakLine : 'You and a partner, neither done today'}
-            />
-          </View>
+          {streak ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <StreakFlame days={streak.current_streak} size={44} />
+              <BigNumber value={streak.current_streak} unit={streak.current_streak === 1 ? 'day' : 'days'} />
+            </View>
+          ) : (
+            <TileIcon name="flame-outline" muted />
+          )}
         </Tile>
       </View>
 

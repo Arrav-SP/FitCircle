@@ -64,7 +64,7 @@ export default function BodyWeightScreen() {
               <View>
                 <BigNumber value={kgToDisplay(latest.kg, units)} unit={units} />
                 <AppText variant="caption" tone="muted">
-                  {[formatDay(latest.local_date), weightChange(latest.kg, entries[1]?.kg, units)].filter(Boolean).join(', ')}
+                  {[formatDay(latest.local_date), weightChange(latest.kg, entries[1]?.kg, units)?.toLowerCase()].filter(Boolean).join(', ')}
                 </AppText>
               </View>
             ) : (

@@ -1,4 +1,5 @@
-import type { PropsWithChildren } from 'react';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import type { ComponentProps, PropsWithChildren } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { radius, spacing, useColors } from '@/theme/tokens';
@@ -17,12 +18,16 @@ type Props = PropsWithChildren<{
   accessibilityLabel?: string;
 }>;
 
+// The tallest standard picture: a BigNumber line.
+const PICTURE_HEIGHT = 52;
+
 /** A dashboard tile. Full width by default; pass `fill` to tiles that share a row. */
 export function Tile({ title, caption, onPress, fill = false, captionTone = 'muted', accessibilityLabel, children }: Props) {
   const colors = useColors();
   const body = (
     <>
-      {children}
+      {/* The same height of picture in every tile, so titles line up across a row. */}
+      {children ? <View style={{ minHeight: PICTURE_HEIGHT, justifyContent: 'center' }}>{children}</View> : null}
       {title ? (
         <View>
           <AppText variant="heading" style={{ fontSize: 17, lineHeight: 22 }}>
@@ -58,6 +63,34 @@ export function Tile({ title, caption, onPress, fill = false, captionTone = 'mut
       style={({ pressed }) => [style, { opacity: pressed ? 0.8 : 1 }]}>
       {body}
     </Pressable>
+  );
+}
+
+/** An icon in a tinted circle: the picture for a tile that has no number to show. */
+export function TileIcon({ name, muted = false }: { name: ComponentProps<typeof Ionicons>['name']; muted?: boolean }) {
+  const colors = useColors();
+  return (
+    <View
+      style={{
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: muted ? colors.surfaceSunken : colors.accentMuted,
+      }}>
+      <Ionicons name={name} size={24} color={muted ? colors.textMuted : colors.accent} />
+    </View>
+  );
+}
+
+/** A thin bar that fills with progress towards a goal, for under a tile's number. */
+export function TileBar({ value, goal }: { value: number; goal: number }) {
+  const colors = useColors();
+  return (
+    <View style={{ height: 6, borderRadius: 3, backgroundColor: colors.surfaceSunken, overflow: 'hidden' }}>
+      <View style={{ width: `${Math.min(100, (value / Math.max(goal, 1)) * 100)}%`, height: 6, borderRadius: 3, backgroundColor: colors.accent }} />
+    </View>
   );
 }
 

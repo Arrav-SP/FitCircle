@@ -1,8 +1,6 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
 
-import { Tile } from '@/components/Tile';
-import { useColors } from '@/theme/tokens';
+import { Tile, TileIcon } from '@/components/Tile';
 
 import { installState } from './install';
 
@@ -14,7 +12,6 @@ const standalone = () =>
 
 /** Offers to put FitCircle on the home screen; hidden once it is running from there. */
 export function InstallCard() {
-  const colors = useColors();
   const [offer, setOffer] = useState(() => (window as InstallWindow).fitcircleInstallPrompt ?? null);
   const [installed, setInstalled] = useState(standalone);
 
@@ -48,14 +45,14 @@ export function InstallCard() {
       title="Install FitCircle"
       caption={
         state === 'ios'
-          ? 'In Safari, tap Share, then Add to Home Screen.'
+          ? 'Safari: Share, then Add to Home Screen'
           : state === 'manual'
-            ? "In your browser's menu, choose Install app or Add to Home screen."
-            : 'Tap to put it on your home screen.'
+            ? 'Browser menu: Install app'
+            : 'Tap to add it to your home screen'
       }
       captionTone={state === 'prompt' ? 'accent' : 'muted'}
       onPress={state === 'prompt' ? install : undefined}>
-      <Ionicons name="download-outline" size={40} color={colors.accent} />
+      <TileIcon name="download-outline" />
     </Tile>
   );
 }

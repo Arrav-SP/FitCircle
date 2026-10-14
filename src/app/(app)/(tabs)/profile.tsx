@@ -8,7 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Screen } from '@/components/Screen';
-import { BigNumber, Tile } from '@/components/Tile';
+import { BigNumber, Tile, TileIcon } from '@/components/Tile';
 import { InstallCard } from '@/features/app/InstallCard';
 import { signOut } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
@@ -62,14 +62,10 @@ export default function ProfileScreen() {
           title="Who sees my workouts"
           caption={profile.hide_workouts ? 'Only me' : 'My friends'}
           onPress={() => router.push('/privacy')}>
-          <Ionicons name={profile.hide_workouts ? 'eye-off-outline' : 'eye-outline'} size={40} color={colors.accent} />
+          <TileIcon name={profile.hide_workouts ? 'eye-off-outline' : 'eye-outline'} />
         </Tile>
         <Tile fill title="Notifications" caption={notifications} onPress={() => router.push('/notifications')}>
-          <Ionicons
-            name={push.on ? 'notifications-outline' : 'notifications-off-outline'}
-            size={40}
-            color={push.on ? colors.accent : colors.textMuted}
-          />
+          <TileIcon name={push.on ? 'notifications-outline' : 'notifications-off-outline'} muted={!push.on} />
         </Tile>
       </View>
 
