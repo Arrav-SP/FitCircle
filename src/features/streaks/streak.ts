@@ -30,13 +30,16 @@ export type Streak = {
   target_days: number | null;
   current_streak: number;
   longest_streak: number;
-  /** Earned one per 7 completed days, less those spent. */
+  /** Earned one per 7 completed days and one per week you both did your dares, less those spent. */
   cover_passes: number;
   /** Newest first. */
   days: StreakDay[];
 };
 
-export const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+/** from_id and to_id are null once that person has deleted their account. */
+export type Dare = { id: string; from_id: string | null; to_id: string | null; body: string; week_start: string; done_at: string | null };
+
+export const WEEKDAY_LABELS =['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 /** The calendar date (YYYY-MM-DD) at this instant in a named timezone. */
 export function localDateIn(timezone: string, now: Date): string {
@@ -202,6 +205,13 @@ export function streakErrorMessage(error: unknown): string {
     case 'cannot_cover':
     case 'day_not_missed':
       return 'This day cannot be covered.';
+    case 'dare_exists':
+      return 'You have already sent a dare this week.';
+    case 'invalid_dare':
+      return 'Write between 1 and 120 characters.';
+    case 'dare_done':
+    case 'dare_not_found':
+      return 'This dare has changed. Go back and look again.';
     case 'note_exists':
       return 'You have already sealed a note for this streak.';
     case 'note_closed':

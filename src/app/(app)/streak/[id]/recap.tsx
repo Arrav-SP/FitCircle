@@ -14,7 +14,7 @@ import { useFriends } from '@/features/friends/friends';
 import { useMyProfile } from '@/features/profile/profile';
 import { shareRecapImage, type RecapCard } from '@/features/streaks/recapImage';
 import { addDays, localDateIn, partnerId, weekRecap, weekStartOf, WEEKDAY_LABELS, type RecapDay } from '@/features/streaks/streak';
-import { useStreaks } from '@/features/streaks/streaks';
+import { useDares, useStreaks } from '@/features/streaks/streaks';
 import { spacing, useColors } from '@/theme/tokens';
 
 const shortDay = (date: string) => new Date(`${date}T00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
@@ -28,6 +28,8 @@ export default function StreakRecapScreen() {
   const myName = useMyProfile().data?.display_name ?? 'You';
   const streaks = useStreaks();
   const friends = useFriends();
+  // Optional extra: the recap shows without the dares row if they fail to load.
+  const dares = useDares(id);
   const [week, setWeek] = useState<'this' | 'last'>('this');
   const [now] = useState(() => new Date());
   const [shareState, setShareState] = useState<'idle' | 'busy' | 'saved' | 'failed'>('idle');
@@ -74,6 +76,10 @@ export default function StreakRecapScreen() {
   const shared: [string, string][] = [[partner, days(recap.partner)]];
   if (recap.together > 0) shared.push(['Trained together', days(recap.together)]);
   if (recap.covered > 0) shared.push(['Covered', days(recap.covered)]);
+  const weekDares = (dares.data ?? []).filter((dare) => dare.week_start === recap.weekStart);
+  if (weekDares.length > 0) {
+    shared.push(['Dares done', `${weekDares.filter((dare) => dare.done_at).length} of ${weekDares.length}`]);
+  }
   if (streak.status === 'active') shared.push(['Current run', days(streak.current_streak)]);
   const rows: [string, string][] = [['You', days(recap.you)], ...shared];
   const headline = recap.both === 1 ? 'day you both trained' : 'days you both trained';

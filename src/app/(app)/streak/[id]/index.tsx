@@ -14,6 +14,7 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { BigNumber } from '@/components/Tile';
 import { useSession } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
+import { Dares } from '@/features/streaks/Dares';
 import { SealedNotes } from '@/features/streaks/SealedNotes';
 import {
   canCover,
@@ -167,6 +168,8 @@ export default function StreakScreen() {
       ) : null}
 
       {streak.target_days ? <SealedNotes streak={streak} partnerName={partner} /> : null}
+
+      {active ? <Dares streak={streak} me={me} partnerName={partner} /> : null}
 
       <Card>
         <AppText variant="heading">Days</AppText>

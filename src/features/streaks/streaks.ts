@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from '@/features/auth/session';
 import { supabase } from '@/lib/supabase';
 
-import type { Streak, StreakDay } from './streak';
+import type { Dare, Streak, StreakDay } from './streak';
 
 /** Also invalidated (by its first element) whenever a workout is saved or deleted. */
 export const streaksKey = (userId: string | undefined) => ['streaks', userId];
@@ -31,6 +31,26 @@ export function useStreaks() {
         .limit(50);
       if (error) throw error;
       return data.map(({ streak_days, ...streak }) => ({ ...streak, days: streak_days as StreakDay[] }) as Streak);
+    },
+  });
+}
+
+export const daresKey = (streakId: string) => ['streak-dares', streakId];
+
+/** A streak's dares, newest week first. */
+export function useDares(streakId: string) {
+  return useQuery({
+    queryKey: daresKey(streakId),
+    queryFn: async (): Promise<Dare[]> => {
+      const { data, error } = await supabase
+        .from('streak_dares')
+        .select('id, from_id, to_id, body, week_start, done_at')
+        .eq('challenge_id', streakId)
+        .order('week_start', { ascending: false })
+        // Two a week, so about a year; the completed count on the streak page covers only these.
+        .limit(100);
+      if (error) throw error;
+      return data;
     },
   });
 }

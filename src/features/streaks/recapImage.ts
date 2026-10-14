@@ -12,7 +12,7 @@ export type RecapCard = {
 };
 
 const WIDTH = 1080;
-const HEIGHT = 1440;
+const HEIGHT = 1520;
 const EDGE = 96;
 
 // shortcut: the image is drawn by hand on a canvas and has to be kept in step with the card on the recap
