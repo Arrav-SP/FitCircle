@@ -44,12 +44,15 @@ select is((select count(*) from public.workouts where user_id = '00000000-0000-0
 select is((select count(*) from public.metric_entries where user_id = '00000000-0000-0000-0000-00000000000a'), 0::bigint, 'the health entries are gone');
 select is((select count(*) from public.invites where inviter_id = '00000000-0000-0000-0000-00000000000a'), 0::bigint, 'the invites are gone');
 select is(
-  (select count(*) from public.friendships) + (select count(*) from public.workout_hides), 0::bigint,
+  (select count(*) from public.friendships where '00000000-0000-0000-0000-00000000000a' in (user_low, user_high))
+    + (select count(*) from public.workout_hides where '00000000-0000-0000-0000-00000000000a' in (owner_id, friend_id)), 0::bigint,
   'friendships and hide lists that involved them are gone');
 
 -- Bob keeps everything of his own, and the streak history.
 select is(
-  (select count(*) from public.profiles) || ' ' || (select count(*) from public.workouts) || ' ' || (select count(*) from public.metric_entries),
+  (select count(*) from public.profiles where id = '00000000-0000-0000-0000-00000000000b') || ' '
+    || (select count(*) from public.workouts where user_id = '00000000-0000-0000-0000-00000000000b') || ' '
+    || (select count(*) from public.metric_entries where user_id = '00000000-0000-0000-0000-00000000000b'),
   '1 1 1', 'the other person keeps their profile, workouts and entries');
 select is(
   (select used_by is null and used_at is not null from public.invites where token = 'bobtoken'), true,

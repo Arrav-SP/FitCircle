@@ -13,7 +13,7 @@ import { Screen } from '@/components/Screen';
 import { ErrorState, Skeleton } from '@/components/States';
 import { TextField } from '@/components/TextField';
 import { BigNumber } from '@/components/Tile';
-import { useBodyWeights, useDeleteBodyWeight, useSaveBodyWeight } from '@/features/metrics/metrics';
+import { useBodyWeights, useDeleteMetric, useSaveMetric } from '@/features/metrics/metrics';
 import { parseBodyWeight, weightChange, type WeightEntry } from '@/features/metrics/weight';
 import { useMyProfile } from '@/features/profile/profile';
 import { dayKey } from '@/lib/dates';
@@ -28,8 +28,8 @@ export default function BodyWeightScreen() {
   const router = useRouter();
   const profile = useMyProfile().data;
   const weights = useBodyWeights();
-  const save = useSaveBodyWeight();
-  const remove = useDeleteBodyWeight();
+  const save = useSaveMetric('body_weight');
+  const remove = useDeleteMetric('body_weight');
   const [day, setDay] = useState(() => dayKey(new Date()));
   const [typed, setTyped] = useState('');
   const [invalid, setInvalid] = useState(false);
@@ -47,7 +47,7 @@ export default function BodyWeightScreen() {
     const kg = parseBodyWeight(typed, units);
     setInvalid(kg === null);
     if (kg === null) return;
-    save.mutate({ day, kg }, { onSuccess: () => setTyped('') });
+    save.mutate({ day, value: kg }, { onSuccess: () => setTyped('') });
   }
 
   return (

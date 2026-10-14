@@ -33,7 +33,7 @@ This is a private beta for fewer than ten people who know each other. It is not 
 
 ### Stretch (only if the day-15 checkpoint is met)
 
-Manual steps and sleep logging. Emoji reactions on feed items.
+Manual steps and sleep logging (built in step 9: one entry per day each, typed by hand, owner-only like body weight; sleep stored in minutes and counted on the day you woke up). Emoji reactions on feed items.
 
 ### Out for this phase
 

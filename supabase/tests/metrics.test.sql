@@ -1,5 +1,5 @@
 begin;
-select plan(20);
+select plan(24);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'alice@test.local'),
@@ -77,6 +77,23 @@ select is((select value from public.metric_entries where type = 'water'), 4::num
 select is((select count(*) from public.metric_entries), 2::bigint, 'a friend''s delete removed nothing');
 select lives_ok($$delete from public.metric_entries where type = 'body_weight'$$, 'the owner deletes an entry');
 select is((select count(*) from public.metric_entries), 1::bigint, 'only that entry is gone');
+
+-- Steps and sleep (minutes), as the Health screen saves them.
+select lives_ok(
+  $$insert into public.metric_entries (user_id, type, local_date, value)
+    values ('00000000-0000-0000-0000-00000000000a', 'steps', current_date, 200000),
+           ('00000000-0000-0000-0000-00000000000a', 'sleep', current_date, 1440)$$,
+  'a user logs steps and sleep at their limits');
+select throws_ok(
+  $$insert into public.metric_entries (user_id, type, local_date, value)
+    values ('00000000-0000-0000-0000-00000000000a', 'sleep', current_date - 1, 1441)$$,
+  '23514', null, 'more than 24 hours of sleep is rejected');
+select throws_ok(
+  $$insert into public.metric_entries (user_id, type, local_date, value)
+    values ('00000000-0000-0000-0000-00000000000a', 'steps', current_date - 1, 10.5)$$,
+  '23514', null, 'part of a step is rejected');
+select set_config('role', 'authenticated', true), set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+select is((select count(*) from public.metric_entries where type in ('steps', 'sleep')), 0::bigint, 'a friend reads no steps or sleep');
 
 select * from finish();
 rollback;

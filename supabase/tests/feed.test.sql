@@ -65,12 +65,12 @@ insert into public.streak_days (challenge_id, local_date, a_done, b_done, status
 select '00000000-0000-0000-0000-0000000000c1', d::date, true, true, 'complete'
 from generate_series('2026-01-05'::date, '2026-01-10'::date, interval '1 day') as d;
 select private.recompute_streak('00000000-0000-0000-0000-0000000000c1');
-select is((select count(*) from public.streak_milestones), 0::bigint, 'six days is not a milestone');
+select is((select count(*) from public.streak_milestones where challenge_id = '00000000-0000-0000-0000-0000000000c1'), 0::bigint, 'six days is not a milestone');
 insert into public.streak_days (challenge_id, local_date, a_done, b_done) values ('00000000-0000-0000-0000-0000000000c1', '2026-01-11', true, true);
 select private.recompute_streak('00000000-0000-0000-0000-0000000000c1');
 select private.recompute_streak('00000000-0000-0000-0000-0000000000c1');
 select is(
-  (select string_agg(milestone::text, ',') from public.streak_milestones), '7', 'the seventh day records the milestone once');
+  (select string_agg(milestone::text, ',') from public.streak_milestones where challenge_id = '00000000-0000-0000-0000-0000000000c1'), '7', 'the seventh day records the milestone once');
 
 select set_config('role', 'authenticated', true), set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
 select is(pg_temp.titles(), 'milestone 7, Bob run, Bob legs', 'a friend''s milestone appears in the feed');
@@ -98,7 +98,7 @@ select ok(
 reset role;
 update public.streak_days set b_done = false where challenge_id = '00000000-0000-0000-0000-0000000000c1' and local_date = '2026-01-11';
 select private.recompute_streak('00000000-0000-0000-0000-0000000000c1');
-select is((select count(*) from public.streak_milestones), 0::bigint, 'undoing the day removes the milestone');
+select is((select count(*) from public.streak_milestones where challenge_id = '00000000-0000-0000-0000-0000000000c1'), 0::bigint, 'undoing the day removes the milestone');
 select is(
   (select current_streak || '/' || longest_streak from public.streak_challenges where id = '00000000-0000-0000-0000-0000000000c1'),
   '6/6', 'and the numbers follow');

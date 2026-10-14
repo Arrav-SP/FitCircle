@@ -72,7 +72,8 @@ select throws_ok(
 select pg_temp.put('2026-01-13', true, true, 'complete');
 select is(pg_temp.nums(), '8/8/0', 'the next completed day continues the run across the covered day');
 select is(
-  (select string_agg(milestone::text, ',') from public.streak_milestones), '7', 'the milestone follows the restored run');
+  (select string_agg(milestone::text, ',') from public.streak_milestones where challenge_id = '00000000-0000-0000-0000-0000000000c1'),
+  '7', 'the milestone follows the restored run');
 
 -- With no pass left a miss cannot be covered; a day both missed can never be covered.
 select pg_temp.put('2026-01-14', true, false, 'missed');
