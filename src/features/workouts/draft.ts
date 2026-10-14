@@ -43,6 +43,8 @@ export type Workout = {
   /** Hidden from friends. */
   hidden: boolean;
   exercises: WorkoutExercise[];
+  /** Friends' reactions; loaded only for your own workouts. name is null for someone no longer a friend. */
+  reactions?: { emoji: string; name: string | null }[];
 };
 
 // The editor keeps numbers as typed text so a half-typed value is not lost or reformatted.

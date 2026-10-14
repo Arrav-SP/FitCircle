@@ -67,6 +67,11 @@ export default function WorkoutDetailScreen() {
         <AppText variant="caption" tone="muted">
           {workout.hidden ? 'Hidden from friends' : 'Visible to your friends'}
         </AppText>
+        {workout.reactions?.length ? (
+          <AppText variant="caption" tone="muted">
+            {workout.reactions.map((reaction) => `${reaction.emoji} ${reaction.name ?? 'A former friend'}`).join(', ')}
+          </AppText>
+        ) : null}
       </View>
 
       {workout.exercises.map((exercise, index) => (

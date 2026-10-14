@@ -33,7 +33,7 @@ This is a private beta for fewer than ten people who know each other. It is not 
 
 ### Stretch (only if the day-15 checkpoint is met)
 
-Manual steps and sleep logging (built in step 9: one entry per day each, typed by hand, owner-only like body weight; sleep stored in minutes and counted on the day you woke up). Emoji reactions on feed items.
+Manual steps and sleep logging (built in step 9: one entry per day each, typed by hand, owner-only like body weight; sleep stored in minutes and counted on the day you woke up). Emoji reactions on feed items (built in step 9; see `reactions`).
 
 ### Out for this phase
 
@@ -237,8 +237,7 @@ Schema changes reach production only through migration files.
 | `streak_challenges` | Configuration and state | `id`, `user_a`, `user_b`, `proposer_id`, `status`, `timezone`, `weekdays`, `min_minutes`, `start_date`, `start_same_day`, `reward`, `forfeit`, `target_days`, `current_streak`, `longest_streak`, `last_finalised_date` |
 | `streak_days` | Day ledger | `challenge_id`, `local_date`, `a_done`, `b_done`, `together`, `status` (open, complete, missed, covered), `finalised_at` |
 | `streak_milestones` | Milestones a streak's best run has reached. Replaces the planned `shared_events`: since friends see workouts by default, the feed reads workouts live and only milestones need a record | `challenge_id`, `milestone`, `reached_at` |
-
-`event_reactions` is added only if the stretch item is built.
+| `reactions` (step 9 stretch item) | One emoji (🔥 💪 👏 ❤️ 😂, no free text) per person on a friend's workout or a streak milestone in the activity feed. Written only through `api.react`, which applies the feed's own visibility rule; readable by the reactor and by the workout's owner; counts reach the feed through `api.feed`. Removed with the workout, the milestone or the account | `user_id`, `workout_id` or (`challenge_id`, `milestone`), `emoji` |
 
 ### Rules
 
@@ -295,6 +294,7 @@ Schema changes reach production only through migration files.
 | `metric_entries` | Owner | Owner |
 | `streak_challenges`, `streak_days` | Either participant | Function only |
 | `streak_milestones` | No direct access. Read through `api.feed`, which shows friends' non-hidden workouts and the milestones of the caller and of friends who have not hidden their activity; a partner the caller is not connected to is left unnamed | Function only |
+| `reactions` | Read: your own reactions, and all reactions on your own workouts (with the reactor's name through the friend profile rule). Write: only `api.react`, and only on an item the feed shows you (a friend's non-hidden workout from someone who has not hidden their activity from you, or a milestone of yours or of such a friend) | Function only |
 
 A streak partner never reads the other's workouts. They see only the done flags on `streak_days`.
 

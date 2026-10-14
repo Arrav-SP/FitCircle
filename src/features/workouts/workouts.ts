@@ -33,6 +33,7 @@ export type WorkoutRow = {
     exercises: { name: string; muscle_group: MuscleGroup; tracking: Tracking } | null;
     workout_sets: { position: number; reps: number; weight_kg: number | null }[];
   }[];
+  reactions?: { emoji: string; profiles: { display_name: string } | null }[];
 };
 
 export function toWorkout(row: WorkoutRow): Workout {
@@ -43,6 +44,7 @@ export function toWorkout(row: WorkoutRow): Workout {
     duration_minutes: row.duration_minutes,
     notes: row.notes,
     hidden: row.hidden ?? false,
+    reactions: row.reactions?.map((reaction) => ({ emoji: reaction.emoji, name: reaction.profiles?.display_name ?? null })),
     exercises: [...row.workout_exercises]
       .sort((a, b) => a.position - b.position)
       .map((entry) => ({
@@ -68,7 +70,7 @@ export function useWorkouts() {
       const { data, error } = await supabase
         .from('workouts')
         .select(
-          'id, title, started_at, duration_minutes, notes, hidden, workout_exercises(position, exercise_id, duration_minutes, exercises(name, muscle_group, tracking), workout_sets(position, reps, weight_kg))',
+          'id, title, started_at, duration_minutes, notes, hidden, workout_exercises(position, exercise_id, duration_minutes, exercises(name, muscle_group, tracking), workout_sets(position, reps, weight_kg)), reactions(emoji, profiles(display_name))',
         )
         .order('started_at', { ascending: false })
         .limit(200);

@@ -9,14 +9,16 @@ import { Card } from '@/components/Card';
 import { ErrorState, Skeleton } from '@/components/States';
 import { spacing, useColors } from '@/theme/tokens';
 
-import { useFeed } from './feed';
+import { useFeed, useReact } from './feed';
 import { exerciseSummary, milestoneNames, timeAgo } from './format';
+import { ReactionBar } from './ReactionBar';
 
 /** Friends' workouts and streak milestones, newest first. */
 export function Feed() {
   const colors = useColors();
   const router = useRouter();
   const feed = useFeed();
+  const react = useReact();
   const [now] = useState(() => new Date());
 
   return (
@@ -30,10 +32,10 @@ export function Feed() {
         <AppText tone="muted">Nothing from your friends yet.</AppText>
       ) : (
         <Card>
-          {feed.data.map((item) =>
-            item.kind === 'workout' ? (
+          {feed.data.map((item) => (
+            <View key={item.kind === 'workout' ? item.workout_id : `${item.challenge_id}-${item.milestone}`} style={{ gap: spacing.xs }}>
+            {item.kind === 'workout' ? (
               <Pressable
-                key={item.workout_id}
                 accessibilityRole="button"
                 accessibilityLabel={`${item.actor_name}, ${item.title}, ${item.duration_minutes} minutes. See their workouts`}
                 onPress={() => router.push({ pathname: '/friend/[id]', params: { id: item.actor_id } })}
@@ -53,7 +55,6 @@ export function Feed() {
               </Pressable>
             ) : (
               <Pressable
-                key={`${item.challenge_id}-${item.milestone}`}
                 accessibilityRole={item.mine ? 'button' : 'text'}
                 disabled={!item.mine}
                 onPress={() => router.push({ pathname: '/streak/[id]', params: { id: item.challenge_id } })}
@@ -81,8 +82,19 @@ export function Feed() {
                   {timeAgo(item.at, now)}
                 </AppText>
               </Pressable>
-            ),
-          )}
+            )}
+            <ReactionBar
+              reactions={item.reactions}
+              my_reaction={item.my_reaction}
+              onPick={(emoji) => react.mutate({ item, emoji })}
+            />
+            </View>
+          ))}
+          {react.isError ? (
+            <AppText variant="caption" tone="danger" accessibilityRole="alert">
+              That reaction was not saved. Try again.
+            </AppText>
+          ) : null}
         </Card>
       )}
     </View>

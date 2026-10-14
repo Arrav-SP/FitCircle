@@ -1,4 +1,7 @@
-export type FeedItem =
+import type { Reactions } from './reactions.ts';
+
+export type FeedItem = Reactions &
+  (
   | {
       kind: 'workout';
       at: string;
@@ -17,7 +20,8 @@ export type FeedItem =
       mine: boolean;
       /** "You", a friend's name, or null for a partner the viewer is not connected to. */
       names: [string | null, string | null];
-    };
+    }
+  );
 
 /** "Squat, Lunge +2": the first two exercise names and how many more. */
 export function exerciseSummary(names: readonly string[]): string {

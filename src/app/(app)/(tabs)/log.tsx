@@ -8,6 +8,7 @@ import { DotCalendar } from '@/components/DotCalendar';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { Tile } from '@/components/Tile';
+import { reactionSummary } from '@/features/feed/reactions';
 import { formatWorkoutDate, useWorkouts } from '@/features/workouts/workouts';
 import { dayKey } from '@/lib/dates';
 import { spacing } from '@/theme/tokens';
@@ -70,9 +71,11 @@ export default function LogScreen() {
           {shown.map((workout) => {
             const sets = workout.exercises.reduce((total, exercise) => total + exercise.sets.length, 0);
             const exercises = workout.exercises.length;
+            const reactions = reactionSummary((workout.reactions ?? []).map((reaction) => reaction.emoji));
             const summary =
               `${exercises} ${exercises === 1 ? 'exercise' : 'exercises'}` +
-              (sets > 0 ? `, ${sets} ${sets === 1 ? 'set' : 'sets'}` : '');
+              (sets > 0 ? `, ${sets} ${sets === 1 ? 'set' : 'sets'}` : '') +
+              (reactions ? `   ${reactions}` : '');
             return (
               <Tile
                 key={workout.id}
