@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { canCover, flameLevel, forfeitOwed, isoWeekday, localDateIn, rewardProgress, scheduleLabel, todayFor, todayLine, weekRecap, weekStartOf, type Streak, type StreakDay } from './streak.ts';
+import { canCover, dareStatus, flameLevel, forfeitOwed, isoWeekday, localDateIn, rewardProgress, scheduleLabel, todayFor, todayLine, lastDays, weekRecap, weekStartOf, type Streak, type StreakDay } from './streak.ts';
 
 const base: Streak = {
   id: 's',
@@ -129,4 +129,38 @@ test('weekRecap counts one week from each side and ignores other weeks', () => {
   });
   const fromB = weekRecap(streak, 'b', '2026-01-05');
   assert.deepEqual([fromB.you, fromB.partner, fromB.days[1], fromB.days[4]], [2, 3, 'you', 'partner']);
+});
+
+test('lastDays runs oldest first up to today, from either side', () => {
+  const streak = {
+    ...base,
+    days: [
+      { local_date: '2026-01-07', a_done: true, b_done: false, together: false, status: 'open' as const },
+      { local_date: '2026-01-06', a_done: true, b_done: true, together: false, status: 'complete' as const },
+      { local_date: '2026-01-05', a_done: false, b_done: true, together: false, status: 'covered' as const },
+    ],
+  };
+  assert.deepEqual(
+    lastDays(streak, 'a', '2026-01-07', 4),
+    [
+      { date: '2026-01-04', state: 'rest' },
+      { date: '2026-01-05', state: 'covered' },
+      { date: '2026-01-06', state: 'both' },
+      { date: '2026-01-07', state: 'you' },
+    ],
+  );
+  assert.equal(lastDays(streak, 'b', '2026-01-07', 1)[0].state, 'partner');
+});
+
+test('dareStatus counts done dares and reads this week from your side', () => {
+  const dare = (id: string, from_id: string, to_id: string, week_start: string, done_at: string | null) =>
+    ({ id, from_id, to_id, body: 'x', week_start, done_at });
+  const dares = [
+    dare('1', 'b', 'a', '2026-01-12', null),
+    dare('2', 'a', 'b', '2026-01-12', '2026-01-13T10:00:00Z'),
+    dare('3', 'b', 'a', '2026-01-05', '2026-01-06T10:00:00Z'),
+  ];
+  assert.deepEqual(dareStatus(dares, 'a', '2026-01-12'), { done: 2, waiting: true, sent: true });
+  assert.deepEqual(dareStatus(dares, 'b', '2026-01-12'), { done: 2, waiting: false, sent: true });
+  assert.deepEqual(dareStatus(dares, 'a', '2026-01-19'), { done: 2, waiting: false, sent: false });
 });

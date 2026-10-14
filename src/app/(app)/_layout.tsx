@@ -61,6 +61,10 @@ export default function AppLayout() {
         <Stack.Screen name="streak/new" />
         <Stack.Screen name="streak/[id]/index" />
         <Stack.Screen name="streak/[id]/recap" />
+        <Stack.Screen name="streak/[id]/deal" />
+        <Stack.Screen name="streak/[id]/notes" />
+        <Stack.Screen name="streak/[id]/dares" />
+        <Stack.Screen name="streak/[id]/days" />
         <Stack.Screen name="invite/[token]" />
         <Stack.Screen name="workout/new" />
         <Stack.Screen name="workout/[id]/index" />

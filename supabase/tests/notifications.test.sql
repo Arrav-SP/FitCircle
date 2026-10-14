@@ -1,7 +1,7 @@
 -- What each event queues, for whom, and that nothing is queued twice. Alice and Bob have devices; Cara does not.
 -- Their streak runs every day in India from Monday 5 January 2026.
 begin;
-select plan(20);
+select plan(21);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'alice@test.local'),
@@ -79,6 +79,8 @@ select is(pg_temp.queued('accepted:'), '', 'Cara has no device, so her acceptanc
 select set_config('test.dare', private.give_dare('00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-00000000000a',
   'Plank 3 minutes', '2026-01-14 10:00+05:30')::text, true);
 select is(pg_temp.queued('dare:'), 'bob: Alice dared you', 'a dare tells the person dared');
+select is((select url from private.notification_outbox where dedupe_key like 'dare:%'),
+  '/streak/00000000-0000-0000-0000-0000000000c1/dares', 'and opens the Dares page');
 update public.streak_dares set done_at = now() where id = current_setting('test.dare')::uuid;
 select is(pg_temp.queued('dare-done:'), 'alice: Bob did your dare', 'doing it tells the giver');
 

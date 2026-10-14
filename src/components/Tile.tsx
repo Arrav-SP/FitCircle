@@ -12,11 +12,13 @@ type Props = PropsWithChildren<{
   onPress?: () => void;
   /** Share a row equally with the tiles beside it. Leave off for a full-width tile. */
   fill?: boolean;
+  /** accent draws the eye to a caption that needs action, e.g. "A dare for you". */
+  captionTone?: 'muted' | 'accent';
   accessibilityLabel?: string;
 }>;
 
 /** A dashboard tile. Full width by default; pass `fill` to tiles that share a row. */
-export function Tile({ title, caption, onPress, fill = false, accessibilityLabel, children }: Props) {
+export function Tile({ title, caption, onPress, fill = false, captionTone = 'muted', accessibilityLabel, children }: Props) {
   const colors = useColors();
   const body = (
     <>
@@ -27,7 +29,7 @@ export function Tile({ title, caption, onPress, fill = false, accessibilityLabel
             {title}
           </AppText>
           {caption ? (
-            <AppText variant="caption" tone="muted">
+            <AppText variant="caption" tone={captionTone}>
               {caption}
             </AppText>
           ) : null}

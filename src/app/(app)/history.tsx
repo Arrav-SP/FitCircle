@@ -5,8 +5,8 @@ import { Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { ChipGroup } from '@/components/ChipGroup';
+import { Collapsible } from '@/components/Collapsible';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { TextField } from '@/components/TextField';
@@ -42,7 +42,6 @@ export default function HistoryScreen() {
   const { day } = useLocalSearchParams<{ day?: string }>();
   const [sort, setSort] = useState<Sort>('newest');
   const [filters, setFilters] = useState<HistoryFilters>(NO_FILTERS);
-  const [open, setOpen] = useState(false);
   const [today] = useState(() => new Date());
   const set = (changes: Partial<HistoryFilters>) => setFilters((current) => ({ ...current, ...changes }));
 
@@ -69,42 +68,26 @@ export default function HistoryScreen() {
     <Screen>
       <AppText variant="title">History</AppText>
 
-      <Card>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Filter and sort. ${historySummary(sort, filters)}`}
-          accessibilityState={{ expanded: open }}
-          onPress={() => setOpen((value) => !value)}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44 }}>
-          <AppText variant="heading" style={{ flex: 1 }}>
-            Filter and sort
-          </AppText>
-          <AppText tone="muted">{historySummary(sort, filters)}</AppText>
-          <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={20} color={colors.textMuted} />
-        </Pressable>
-        {open ? (
-          <>
-            <ChipGroup label="Sort by" options={SORTS} value={sort} onChange={setSort} />
-            <ChipGroup label="When" options={WHEN} value={filters.when} onChange={(when) => set({ when })} />
-            <ChipGroup label="Duration" options={DURATIONS} value={filters.duration} onChange={(duration) => set({ duration })} />
-            <ChipGroup label="Time of day" options={TIMES} value={filters.time} onChange={(time) => set({ time })} />
-            {muscles.length > 0 ? (
-              <ChipGroup
-                label="Muscle"
-                options={[{ value: 'any' as const, label: 'Any' }, ...muscles]}
-                value={filters.muscle}
-                onChange={(muscle) => set({ muscle })}
-              />
-            ) : null}
-            <TextField
-              label="Search"
-              placeholder="Workout or exercise name"
-              value={filters.search}
-              onChangeText={(search) => set({ search })}
-            />
-          </>
+      <Collapsible title="Filter and sort" summary={historySummary(sort, filters)}>
+        <ChipGroup label="Sort by" options={SORTS} value={sort} onChange={setSort} />
+        <ChipGroup label="When" options={WHEN} value={filters.when} onChange={(when) => set({ when })} />
+        <ChipGroup label="Duration" options={DURATIONS} value={filters.duration} onChange={(duration) => set({ duration })} />
+        <ChipGroup label="Time of day" options={TIMES} value={filters.time} onChange={(time) => set({ time })} />
+        {muscles.length > 0 ? (
+          <ChipGroup
+            label="Muscle"
+            options={[{ value: 'any' as const, label: 'Any' }, ...muscles]}
+            value={filters.muscle}
+            onChange={(muscle) => set({ muscle })}
+          />
         ) : null}
-      </Card>
+        <TextField
+          label="Search"
+          placeholder="Workout or exercise name"
+          value={filters.search}
+          onChangeText={(search) => set({ search })}
+        />
+      </Collapsible>
 
       {day ? (
         <Pressable

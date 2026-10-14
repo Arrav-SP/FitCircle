@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
@@ -7,70 +7,32 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { BigNumber } from '@/components/Tile';
-import { useSession } from '@/features/auth/session';
-import { useFriends } from '@/features/friends/friends';
 import { useMyProfile } from '@/features/profile/profile';
 import { shareRecapImage, type RecapCard } from '@/features/streaks/recapImage';
-import { addDays, localDateIn, partnerId, weekRecap, weekStartOf, WEEKDAY_LABELS, type RecapDay } from '@/features/streaks/streak';
-import { useDares, useStreaks } from '@/features/streaks/streaks';
+import { DayDots } from '@/features/streaks/DayDots';
+import { addDays, localDateIn, weekRecap, weekStartOf, WEEKDAY_LABELS } from '@/features/streaks/streak';
+import { StreakLoader, type LoadedStreak } from '@/features/streaks/StreakScreen';
+import { useDares } from '@/features/streaks/streaks';
 import { spacing, useColors } from '@/theme/tokens';
 
 const shortDay = (date: string) => new Date(`${date}T00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 const days = (count: number) => `${count} ${count === 1 ? 'day' : 'days'}`;
 
 export default function StreakRecapScreen() {
+  return <StreakLoader>{(loaded) => <Recap {...loaded} />}</StreakLoader>;
+}
+
+function Recap({ streak, partner, me }: LoadedStreak) {
   const colors = useColors();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const me = useSession().session?.user.id ?? '';
   const myName = useMyProfile().data?.display_name ?? 'You';
-  const streaks = useStreaks();
-  const friends = useFriends();
   // Optional extra: the recap shows without the dares row if they fail to load.
-  const dares = useDares(id);
+  const dares = useDares(streak.id);
   const [week, setWeek] = useState<'this' | 'last'>('this');
   const [now] = useState(() => new Date());
   const [shareState, setShareState] = useState<'idle' | 'busy' | 'saved' | 'failed'>('idle');
 
-  if (streaks.isPending || friends.isPending) {
-    return (
-      <Screen>
-        <Skeleton height={38} width="70%" />
-        <Skeleton height={320} />
-      </Screen>
-    );
-  }
-  if (streaks.isError || friends.isError) {
-    return (
-      <Screen centered>
-        <ErrorState
-          message="This week did not load. Check your connection."
-          onRetry={() => {
-            streaks.refetch();
-            friends.refetch();
-          }}
-        />
-      </Screen>
-    );
-  }
-
-  const streak = streaks.data.find((item) => item.id === id);
-  if (!streak) {
-    return (
-      <Screen centered>
-        <EmptyState
-          icon="help-circle-outline"
-          title="Streak not found"
-          message="It may have been cancelled."
-          action={{ label: 'Back to Streaks', onPress: () => router.replace('/streaks') }}
-        />
-      </Screen>
-    );
-  }
-
-  const partner = friends.data.find((friend) => friend.id === partnerId(streak, me))?.display_name ?? 'A former friend';
   const thisMonday = weekStartOf(localDateIn(streak.timezone ?? 'UTC', now));
   const recap = weekRecap(streak, me, week === 'this' ? thisMonday : addDays(thisMonday, -7));
   const shared: [string, string][] = [[partner, days(recap.partner)]];
@@ -86,15 +48,6 @@ export default function StreakRecapScreen() {
   const range = `${shortDay(recap.weekStart)} to ${shortDay(recap.weekEnd)}`;
   // The picture names both people, so it reads the same whoever receives it.
   const card: RecapCard = { title: `${myName} & ${partner}`, range, headline, recap, rows: [[myName, days(recap.you)], ...shared] };
-
-  const dayNames: Record<RecapDay, string> = {
-    both: 'both trained',
-    covered: 'covered',
-    you: 'only you trained',
-    partner: `only ${partner} trained`,
-    none: 'neither trained',
-    rest: 'no streak day',
-  };
 
   const share = async () => {
     setShareState('busy');
@@ -121,35 +74,7 @@ export default function StreakRecapScreen() {
       <Card>
         <AppText tone="muted">{range}</AppText>
         <BigNumber value={recap.both} unit={headline} />
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          {recap.days.map((day, index) => (
-            <View
-              key={WEEKDAY_LABELS[index]}
-              accessible
-              accessibilityLabel={`${WEEKDAY_LABELS[index]}: ${dayNames[day]}`}
-              style={{ alignItems: 'center', gap: spacing.xs }}>
-              <View style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
-                <View
-                  style={
-                    day === 'rest'
-                      ? { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.border }
-                      : {
-                          width: 32,
-                          height: 32,
-                          borderRadius: 16,
-                          borderWidth: day === 'both' ? 0 : 3,
-                          borderColor: day === 'covered' ? colors.accent : colors.borderStrong,
-                          backgroundColor: day === 'both' ? colors.accent : 'transparent',
-                        }
-                  }
-                />
-              </View>
-              <AppText variant="caption" tone="muted">
-                {WEEKDAY_LABELS[index]}
-              </AppText>
-            </View>
-          ))}
-        </View>
+        <DayDots partnerName={partner} days={recap.days.map((state, index) => ({ label: WEEKDAY_LABELS[index], state }))} />
         <View style={{ gap: spacing.xs }}>
           {rows.map(([label, value]) => (
             <View key={label} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.lg }}>

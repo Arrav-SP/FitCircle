@@ -12,9 +12,30 @@ import { spacing } from '@/theme/tokens';
 
 import { streakErrorMessage, type Streak } from './streak';
 
-type Notes = { mine: string | null; partner_written: boolean; open: boolean; partner: string | null };
+export type Notes = { mine: string | null; partner_written: boolean; open: boolean; partner: string | null };
 
 const notesKey = (streakId: string) => ['streak-notes', streakId];
+
+/** The caller's note, whether the partner wrote one, and the partner's once it has opened. */
+export function useStreakNotes(streakId: string, enabled = true) {
+  return useQuery({
+    queryKey: notesKey(streakId),
+    enabled,
+    queryFn: async (): Promise<Notes> => {
+      const { data, error } = await supabase.schema('api').rpc('streak_notes', { p_challenge_id: streakId });
+      if (error) throw error;
+      return data as Notes;
+    },
+  });
+}
+
+/** A few words for the notes tile: "Open", "Opens at day 7", "Write yours", or nothing. */
+export function notesSummary(notes: Notes | undefined, streak: Streak): string | undefined {
+  if (!notes) return undefined;
+  if (notes.open) return 'Open';
+  if (notes.mine) return `Opens at day ${streak.target_days}`;
+  return streak.status === 'active' ? 'Write yours' : 'Not written';
+}
 
 type Props = { streak: Streak; partnerName: string };
 
@@ -25,14 +46,7 @@ type Props = { streak: Streak; partnerName: string };
 export function SealedNotes({ streak, partnerName }: Props) {
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState('');
-  const notes = useQuery({
-    queryKey: notesKey(streak.id),
-    queryFn: async (): Promise<Notes> => {
-      const { data, error } = await supabase.schema('api').rpc('streak_notes', { p_challenge_id: streak.id });
-      if (error) throw error;
-      return data as Notes;
-    },
-  });
+  const notes = useStreakNotes(streak.id);
   const seal = useMutation({
     mutationFn: async (body: string) => {
       const { error } = await supabase.schema('api').rpc('set_streak_note', { p_challenge_id: streak.id, p_body: body });
@@ -46,7 +60,6 @@ export function SealedNotes({ streak, partnerName }: Props) {
 
   return (
     <Card>
-      <AppText variant="heading">Sealed notes</AppText>
       {notes.isPending ? (
         <Skeleton height={48} />
       ) : notes.isError ? (

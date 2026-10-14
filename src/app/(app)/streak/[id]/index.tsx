@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
@@ -10,95 +10,134 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PairRings } from '@/components/PairRings';
 import { Screen } from '@/components/Screen';
 import { StreakFlame } from '@/components/StreakFlame';
-import { EmptyState, ErrorState, Skeleton } from '@/components/States';
-import { BigNumber } from '@/components/Tile';
-import { useSession } from '@/features/auth/session';
-import { useFriends } from '@/features/friends/friends';
-import { Dares } from '@/features/streaks/Dares';
-import { SealedNotes } from '@/features/streaks/SealedNotes';
+import { BigNumber, Tile } from '@/components/Tile';
+import { DayDots } from '@/features/streaks/DayDots';
+import { notesSummary, useStreakNotes } from '@/features/streaks/SealedNotes';
 import {
   canCover,
+  dareStatus,
   forfeitOwed,
-  partnerId,
-  rewardProgress,
+  isoWeekday,
+  lastDays,
+  localDateIn,
   scheduleLabel,
   streakErrorMessage,
   todayFor,
   todayLine,
+  WEEKDAY_LABELS,
+  weekRecap,
+  weekStartOf,
 } from '@/features/streaks/streak';
-import { useCoverDay, useEndStreak, useStreaks } from '@/features/streaks/streaks';
+import { Row, StreakLoader, type LoadedStreak } from '@/features/streaks/StreakScreen';
+import { useDares, useEndStreak } from '@/features/streaks/streaks';
 import { spacing, useColors } from '@/theme/tokens';
 
 const formatDay = (date: string) =>
   new Date(`${date}T00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.lg }}>
-      <AppText tone="muted">{label}</AppText>
-      <AppText variant="label" style={{ fontSize: 16 }}>
-        {value}
-      </AppText>
-    </View>
-  );
-}
+const SECTIONS = {
+  deal: '/streak/[id]/deal',
+  notes: '/streak/[id]/notes',
+  dares: '/streak/[id]/dares',
+  days: '/streak/[id]/days',
+  recap: '/streak/[id]/recap',
+} as const;
 
 export default function StreakScreen() {
+  return <StreakLoader>{(loaded) => <StreakOverview {...loaded} />}</StreakLoader>;
+}
+
+function StreakOverview({ streak, partner, me }: LoadedStreak) {
   const colors = useColors();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const me = useSession().session?.user.id ?? '';
-  const streaks = useStreaks();
-  const friends = useFriends();
   const end = useEndStreak();
-  const cover = useCoverDay();
+  const dares = useDares(streak.id);
+  const notes = useStreakNotes(streak.id, !!streak.target_days);
   const [confirming, setConfirming] = useState(false);
   const [now] = useState(() => new Date());
 
-  if (streaks.isPending || friends.isPending) {
-    return (
-      <Screen>
-        <Skeleton height={38} width="70%" />
-        <Skeleton height={160} />
-        <Skeleton height={160} />
-      </Screen>
-    );
-  }
-  if (streaks.isError || friends.isError) {
-    return (
-      <Screen centered>
-        <ErrorState
-          message="This streak did not load. Check your connection."
-          onRetry={() => {
-            streaks.refetch();
-            friends.refetch();
-          }}
-        />
-      </Screen>
-    );
-  }
-
-  const streak = streaks.data.find((item) => item.id === id);
-  if (!streak) {
-    return (
-      <Screen centered>
-        <EmptyState
-          icon="help-circle-outline"
-          title="Streak not found"
-          message="It may have been cancelled."
-          action={{ label: 'Back to Streaks', onPress: () => router.replace('/streaks') }}
-        />
-      </Screen>
-    );
-  }
-
-  const partner = friends.data.find((friend) => friend.id === partnerId(streak, me))?.display_name ?? 'A former friend';
   const active = streak.status === 'active';
   const today = todayFor(streak, me, now);
-  const iAmA = streak.user_a === me;
   const owed = forfeitOwed(streak, me, partner);
+  const localToday = localDateIn(streak.timezone ?? 'UTC', now);
+  const week = weekStartOf(localToday);
   // Counted over the days loaded (the latest 60).
   const togetherDays = streak.days.filter((day) => day.together).length;
+  const open = (section: keyof typeof SECTIONS) => router.push({ pathname: SECTIONS[section], params: { id: streak.id } });
+
+  // The parts of the streak, each a tile that opens its own page; only the ones that apply.
+  const tiles: ReactNode[] = [];
+  if (streak.reward || streak.forfeit) {
+    const reached = !!streak.target_days && streak.longest_streak >= streak.target_days;
+    tiles.push(
+      <Tile
+        key="deal"
+        fill
+        title="The deal"
+        caption={owed ?? (reached ? 'Reward reached' : streak.target_days ? `Reward at ${streak.target_days} days` : 'No one owes')}
+        captionTone={owed ? 'accent' : 'muted'}
+        onPress={() => open('deal')}>
+        {streak.target_days && !reached ? (
+          <BigNumber value={streak.target_days - streak.current_streak} unit="to go" />
+        ) : (
+          <Ionicons name={reached ? 'trophy' : 'ribbon-outline'} size={40} color={colors.accent} />
+        )}
+      </Tile>,
+    );
+  }
+  if (active) {
+    const status = dareStatus(dares.data ?? [], me, week);
+    tiles.push(
+      <Tile
+        key="dares"
+        fill
+        title="Dares"
+        caption={status.waiting ? 'A dare for you' : status.sent ? 'Sent this week' : `Dare ${partner}`}
+        captionTone={status.waiting ? 'accent' : 'muted'}
+        onPress={() => open('dares')}>
+        <BigNumber value={status.done} unit="done" />
+      </Tile>,
+    );
+  }
+  if (streak.target_days) {
+    const summary = notesSummary(notes.data, streak);
+    tiles.push(
+      <Tile
+        key="notes"
+        fill
+        title="Sealed notes"
+        caption={summary}
+        captionTone={summary === 'Write yours' ? 'accent' : 'muted'}
+        onPress={() => open('notes')}>
+        <Ionicons
+          name={notes.data?.open ? 'lock-open-outline' : notes.data?.mine ? 'lock-closed' : 'create-outline'}
+          size={40}
+          color={colors.accent}
+        />
+      </Tile>,
+    );
+  }
+  const coverable = streak.days.some((day) => canCover(streak, day, me, now));
+  tiles.push(
+    <Tile
+      key="days"
+      fill
+      title="Days"
+      caption={coverable ? 'You can cover a day' : 'Last 7 days'}
+      captionTone={coverable ? 'accent' : 'muted'}
+      onPress={() => open('days')}>
+      <DayDots
+        size={14}
+        partnerName={partner}
+        days={lastDays(streak, me, localToday, 7).map((day) => ({
+          label: WEEKDAY_LABELS[isoWeekday(day.date) - 1].slice(0, 1),
+          state: day.state,
+        }))}
+      />
+    </Tile>,
+  );
+  const rows = Array.from({ length: Math.ceil(tiles.length / 2) }, (_, index) => tiles.slice(index * 2, index * 2 + 2));
+  const thisWeek = weekRecap(streak, me, week);
 
   return (
     <Screen>
@@ -146,82 +185,17 @@ export default function StreakScreen() {
         {streak.start_date ? <Row label="Started" value={formatDay(streak.start_date)} /> : null}
       </Card>
 
-      {streak.reward || streak.forfeit ? (
-        <Card>
-          <AppText variant="heading">The deal</AppText>
-          {streak.reward ? (
-            <View>
-              <Row
-                label={streak.target_days ? `Reward at ${streak.target_days} days` : 'Reward'}
-                value={rewardProgress(streak) ?? ''}
-              />
-              <AppText>{streak.reward}</AppText>
-            </View>
-          ) : null}
-          {streak.forfeit ? (
-            <View>
-              <Row label="Forfeit for a missed day" value={owed ?? 'No one owes'} />
-              <AppText>{streak.forfeit}</AppText>
-            </View>
-          ) : null}
-        </Card>
-      ) : null}
+      {rows.map((row, index) => (
+        <View key={index} style={{ flexDirection: 'row', gap: spacing.md }}>
+          {row}
+        </View>
+      ))}
 
-      {streak.target_days ? <SealedNotes streak={streak} partnerName={partner} /> : null}
-
-      {active ? <Dares streak={streak} me={me} partnerName={partner} /> : null}
-
-      <Card>
-        <AppText variant="heading">Days</AppText>
-        {cover.isError ? (
-          <AppText variant="caption" tone="danger" accessibilityRole="alert">
-            {streakErrorMessage(cover.error)}
-          </AppText>
-        ) : null}
-        {streak.days.length === 0 ? (
-          <AppText tone="muted">No days yet.</AppText>
-        ) : (
-          streak.days.slice(0, 30).map((day) => {
-            const youDone = iAmA ? day.a_done : day.b_done;
-            const partnerDone = iAmA ? day.b_done : day.a_done;
-            const label = day.status === 'complete' ? 'Both done' : day.status === 'missed' ? 'Missed' : 'Open';
-            const icon = { complete: 'checkmark-circle', missed: 'close-circle', covered: 'shield-checkmark', open: 'ellipse-outline' } as const;
-            const tint = { complete: colors.success, missed: colors.danger, covered: colors.accent, open: colors.textMuted };
-            return (
-              <View key={day.local_date} style={{ gap: spacing.sm }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                  <Ionicons name={icon[day.status]} size={22} color={tint[day.status]} />
-                  <AppText style={{ flex: 1 }}>{formatDay(day.local_date)}</AppText>
-                  <AppText variant="caption" tone="muted">
-                    {day.status === 'complete'
-                      ? label
-                      : day.status === 'covered'
-                        ? // Only the partner who trained can cover, so that is who did.
-                          `Covered by ${youDone ? 'you' : partner}`
-                        : `${label}: ${youDone ? 'you did' : 'you did not'}, ${partnerDone ? `${partner} did` : `${partner} did not`}`}
-                    {day.together ? ', together' : ''}
-                  </AppText>
-                </View>
-                {canCover(streak, day, me, now) ? (
-                  <Button
-                    label={cover.isPending ? 'Covering…' : `Cover for ${partner} (uses 1 pass)`}
-                    variant="secondary"
-                    disabled={cover.isPending}
-                    onPress={() => cover.mutate({ id: streak.id, date: day.local_date })}
-                  />
-                ) : null}
-              </View>
-            );
-          })
-        )}
-      </Card>
+      <Tile title="Weekly recap" caption="This week, to share" onPress={() => open('recap')}>
+        <BigNumber value={thisWeek.both} unit={thisWeek.both === 1 ? 'day you both trained' : 'days you both trained'} />
+      </Tile>
 
       <View style={{ gap: spacing.md }}>
-        <Button
-          label="Weekly recap"
-          variant="secondary"
-          onPress={() => router.push({ pathname: '/streak/[id]/recap', params: { id: streak.id } })}
-        />
         {active ? (
           <Button
             label="End streak"

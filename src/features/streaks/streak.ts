@@ -39,7 +39,16 @@ export type Streak = {
 /** from_id and to_id are null once that person has deleted their account. */
 export type Dare = { id: string; from_id: string | null; to_id: string | null; body: string; week_start: string; done_at: string | null };
 
-export const WEEKDAY_LABELS =['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+/** For the Dares tile: dares done so far, whether one waits for you this week, and whether you have sent yours. */
+export function dareStatus(dares: readonly Dare[], me: string, week: string) {
+  return {
+    done: dares.filter((dare) => dare.done_at).length,
+    waiting: dares.some((dare) => dare.week_start === week && dare.to_id === me && !dare.done_at),
+    sent: dares.some((dare) => dare.week_start === week && dare.from_id === me),
+  };
+}
+
+export const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 /** The calendar date (YYYY-MM-DD) at this instant in a named timezone. */
 export function localDateIn(timezone: string, now: Date): string {
@@ -137,17 +146,34 @@ export type WeekRecap = {
   covered: number;
 };
 
+/** How one calendar day of a streak went, from the signed-in person's side. */
+export function dayState(streak: Streak, me: string, date: string): RecapDay {
+  const day = streak.days.find((item) => item.local_date === date);
+  if (!day) return 'rest';
+  const iAmA = streak.user_a === me;
+  const youDone = iAmA ? day.a_done : day.b_done;
+  const partnerDone = iAmA ? day.b_done : day.a_done;
+  if (day.status === 'covered') return 'covered';
+  return youDone && partnerDone ? 'both' : youDone ? 'you' : partnerDone ? 'partner' : 'none';
+}
+
+/** The last `count` calendar days up to and including `today`, oldest first. */
+export function lastDays(streak: Streak, me: string, today: string, count: number): { date: string; state: RecapDay }[] {
+  return Array.from({ length: count }, (_, index) => {
+    const date = addDays(today, index - count + 1);
+    return { date, state: dayState(streak, me, date) };
+  });
+}
+
 /** One Monday-to-Sunday week of a streak, from the day ledger. No minutes: a partner's workouts are not readable. */
 export function weekRecap(streak: Streak, me: string, weekStart: string): WeekRecap {
   const iAmA = streak.user_a === me;
   const recap: WeekRecap = { weekStart, weekEnd: addDays(weekStart, 6), days: [], both: 0, you: 0, partner: 0, together: 0, covered: 0 };
   for (let offset = 0; offset < 7; offset += 1) {
     const date = addDays(weekStart, offset);
+    recap.days.push(dayState(streak, me, date));
     const day = streak.days.find((item) => item.local_date === date);
-    if (!day) {
-      recap.days.push('rest');
-      continue;
-    }
+    if (!day) continue;
     const youDone = iAmA ? day.a_done : day.b_done;
     const partnerDone = iAmA ? day.b_done : day.a_done;
     if (youDone) recap.you += 1;
@@ -155,9 +181,6 @@ export function weekRecap(streak: Streak, me: string, weekStart: string): WeekRe
     if (youDone && partnerDone) recap.both += 1;
     if (day.together) recap.together += 1;
     if (day.status === 'covered') recap.covered += 1;
-    recap.days.push(
-      day.status === 'covered' ? 'covered' : youDone && partnerDone ? 'both' : youDone ? 'you' : partnerDone ? 'partner' : 'none',
-    );
   }
   return recap;
 }

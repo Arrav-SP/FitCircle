@@ -42,7 +42,6 @@ export function Dares({ streak, me, partnerName }: Props) {
   if (dares.isPending) {
     return (
       <Card>
-        <AppText variant="heading">Dares</AppText>
         <Skeleton height={48} />
       </Card>
     );
@@ -50,7 +49,6 @@ export function Dares({ streak, me, partnerName }: Props) {
   if (dares.isError) {
     return (
       <Card>
-        <AppText variant="heading">Dares</AppText>
         <AppText tone="muted">The dares did not load.</AppText>
       </Card>
     );
@@ -61,10 +59,8 @@ export function Dares({ streak, me, partnerName }: Props) {
   const fromMe = dares.data.find((dare) => dare.week_start === week && dare.from_id === me);
   const doneCount = dares.data.filter((dare) => dare.done_at).length;
   const failed = complete.isError ? complete.error : null;
-
   return (
     <Card>
-      <AppText variant="heading">Dares</AppText>
 
       <View style={{ gap: spacing.sm }}>
         <AppText variant="caption" tone="muted">
