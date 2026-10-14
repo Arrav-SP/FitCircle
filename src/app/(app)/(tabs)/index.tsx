@@ -42,7 +42,7 @@ export default function HomeScreen() {
     const key = dayKey(day);
     const onDay = (workouts ?? []).filter((workout) => dayKey(new Date(workout.started_at)) === key);
     if (onDay.length === 1) router.push(`/workout/${onDay[0].id}`);
-    else router.push({ pathname: '/log', params: { day: key } });
+    else router.push({ pathname: '/history', params: { day: key } });
   }
 
   // The tile shows the active streak with the longest current run.

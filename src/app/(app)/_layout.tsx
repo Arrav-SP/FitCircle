@@ -55,6 +55,7 @@ export default function AppLayout() {
         <Stack.Screen name="weight" />
         <Stack.Screen name="metric/[type]" />
         <Stack.Screen name="progress" />
+        <Stack.Screen name="history" />
         <Stack.Screen name="friends" />
         <Stack.Screen name="friend/[id]" />
         <Stack.Screen name="streak/new" />

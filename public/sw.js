@@ -1,8 +1,16 @@
-// FitCircle's service worker. It only shows push notifications and opens the app when one is tapped.
-// It deliberately caches nothing, so a new deploy is always picked up on the next load.
+// FitCircle's service worker: shows push notifications, opens the app when one is tapped, and makes sure
+// opening the app loads the latest deploy. It deliberately caches nothing.
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+
+// Opening the app always fetches the page itself fresh, so a new deploy shows up straight away instead of a
+// copy the browser kept. Everything else (code, icons) has versioned names and is left to the browser.
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request, { cache: 'no-cache' }));
+  }
+});
 
 self.addEventListener('push', (event) => {
   let message = {};
