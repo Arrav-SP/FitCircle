@@ -10,6 +10,7 @@ import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { InstallCard } from '@/features/app/InstallCard';
 import { signOut } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
 import { useDeleteAccount, useMyProfile, useSetHideWorkouts } from '@/features/profile/profile';
@@ -56,6 +57,8 @@ export default function ProfileScreen() {
           <AppText tone="muted">@{profile.username}</AppText>
         </View>
       </View>
+
+      <InstallCard />
 
       <Card>
         <AppText variant="heading">Goals</AppText>

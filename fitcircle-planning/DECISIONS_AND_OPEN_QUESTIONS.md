@@ -26,6 +26,7 @@ Source references such as [S7] point to `SOURCES_AND_VERIFICATION.md`.
 | A14 | Dares earn a cover pass: a week in which both partners did the other's dare earns the pair one, on top of one per 7 completed days. Dares done show on the weekly recap | Owner, 14 October 2026 |
 | A15 | Access review (step 8): every table, policy, grant and privileged function read in its final form; one fix (a streak from someone who skipped onboarding can no longer be accepted). `access_review.test.sql` now fails if any future table lacks row level security, gives signed-out visitors any right, opens shared state to direct writes, or adds a function without an empty search path | 15 October 2026 |
 | A16 | Backups: `scripts/backup.ps1` dumps the hosted schema and data into `backups/` (git-ignored; it includes sign-in tokens, so treat it like a password); `scripts/restore-local.ps1` loads one into the local database to prove it works. Run weekly by hand: the free plan has no downloadable backups | 15 October 2026 |
+| A17 | FitCircle becomes an installable web app (manifest, icons, a service worker that caches nothing) with Web Push sent by one Supabase Edge Function from a database outbox. Four kinds, each with its own switch: partner trained, evening reminder, proposals and dares, reactions and milestones. Built in three parts: install, plumbing with a test notification, then the notifications | Owner, 15 October 2026: install on the phone and get push notifications. Replaces "no push at launch" |
 
 ## 2. Proposed decisions
 
