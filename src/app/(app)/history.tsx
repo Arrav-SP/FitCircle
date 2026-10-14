@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
 import { ChipGroup } from '@/components/ChipGroup';
 import { Collapsible } from '@/components/Collapsible';
 import { Screen } from '@/components/Screen';
+import { PageHeader } from '@/components/PageHeader';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { TextField } from '@/components/TextField';
 import { useMyProfile } from '@/features/profile/profile';
@@ -66,7 +66,7 @@ export default function HistoryScreen() {
 
   return (
     <Screen>
-      <AppText variant="title">History</AppText>
+      <PageHeader title="History" parent="/log" />
 
       <Collapsible title="Filter and sort" summary={historySummary(sort, filters)}>
         <ChipGroup label="Sort by" options={SORTS} value={sort} onChange={setSort} />
@@ -153,7 +153,6 @@ export default function HistoryScreen() {
         </View>
       )}
 
-      <Button label="Back to Log" variant="secondary" onPress={() => router.replace('/log')} />
     </Screen>
   );
 }

@@ -6,6 +6,7 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { useMyProfile } from '@/features/profile/profile';
@@ -60,10 +61,11 @@ export default function WorkoutDetailScreen() {
   return (
     <Screen>
       <View style={{ gap: spacing.xs }}>
-        <AppText variant="title">{workout.title}</AppText>
-        <AppText tone="muted">
-          {formatWorkoutDate(workout.started_at)} at {time}, {workout.duration_minutes} min
-        </AppText>
+        <PageHeader
+          title={workout.title}
+          subtitle={`${formatWorkoutDate(workout.started_at)} at ${time}, ${workout.duration_minutes} min`}
+          parent="/log"
+        />
         <AppText variant="caption" tone="muted">
           {workout.hidden ? 'Hidden from friends' : 'Visible to your friends'}
         </AppText>
@@ -116,7 +118,6 @@ export default function WorkoutDetailScreen() {
       <View style={{ gap: spacing.md }}>
         <Button label="Edit workout" onPress={() => router.push(`/workout/${workout.id}/edit`)} />
         <Button label="Delete workout" variant="danger" onPress={() => setConfirming(true)} />
-        <Button label="Back to Log" variant="secondary" onPress={() => router.replace('/log')} />
       </View>
 
       <ConfirmDialog

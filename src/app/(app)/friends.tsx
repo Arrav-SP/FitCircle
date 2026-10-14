@@ -8,6 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import {
@@ -52,7 +53,7 @@ export default function FriendsScreen() {
 
   return (
     <Screen>
-      <AppText variant="title">Friends</AppText>
+      <PageHeader title="Friends" parent="/profile" />
 
       <Card>
         <AppText variant="heading">Invite a friend</AppText>
@@ -175,7 +176,6 @@ export default function FriendsScreen() {
 
       {friends.data && friends.data.length > 0 ? <Feed /> : null}
 
-      <Button label="Back to Profile" variant="secondary" onPress={() => router.replace('/profile')} />
 
       <ConfirmDialog
         visible={removing !== null}

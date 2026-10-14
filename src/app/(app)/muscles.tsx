@@ -1,12 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { BodyMap } from '@/components/BodyMap';
-import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { ErrorState, Skeleton } from '@/components/States';
@@ -34,7 +33,6 @@ const shortDate = (date: Date) => date.toLocaleDateString(undefined, { day: 'num
 
 export default function TrainedMusclesScreen() {
   const colors = useColors();
-  const router = useRouter();
   const workouts = useWorkouts();
   const [today] = useState(() => new Date());
   const [range, setRange] = useState<'day' | 'week'>('day');
@@ -81,7 +79,7 @@ export default function TrainedMusclesScreen() {
 
   return (
     <Screen>
-      <AppText variant="title">Trained muscles</AppText>
+      <PageHeader title="Trained muscles" parent="/log" />
 
       <SegmentedControl label="Show" options={RANGE_OPTIONS} value={range} onChange={setRange} />
 
@@ -178,7 +176,6 @@ export default function TrainedMusclesScreen() {
       )}
 
       <SegmentedControl label="Figure" options={FIGURE_OPTIONS} value={figure} onChange={setFigure} />
-      <Button label="Back to Log" variant="secondary" onPress={() => router.replace('/log')} />
     </Screen>
   );
 }

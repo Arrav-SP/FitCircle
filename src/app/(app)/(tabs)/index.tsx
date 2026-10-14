@@ -58,9 +58,9 @@ export default function HomeScreen() {
   return (
     <Screen>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Avatar name={profile.display_name} size={44} />
+        <Avatar name={profile.display_name} size={56} />
         <View style={{ flex: 1 }}>
-          <AppText variant="heading">Hi, {firstName}</AppText>
+          <AppText variant="title">Hi, {firstName}</AppText>
           <AppText variant="caption" tone="muted">
             {dateLine}. {workoutDays.has(dayKey(today)) ? 'Trained today' : 'No workout yet today'}
           </AppText>

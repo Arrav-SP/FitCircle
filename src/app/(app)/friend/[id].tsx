@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { useFriendWorkouts, useFriends } from '@/features/friends/friends';
@@ -15,7 +15,6 @@ import { useMyProfile } from '@/features/profile/profile';
 import { describeSet, draftFromFriendWorkout, type Workout } from '@/features/workouts/draft';
 import { readStoredDraft } from '@/features/workouts/WorkoutEditor';
 import { formatWorkoutDate, useExercises } from '@/features/workouts/workouts';
-import { spacing } from '@/theme/tokens';
 
 export default function FriendScreen() {
   const router = useRouter();
@@ -87,13 +86,7 @@ export default function FriendScreen() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
-        <Avatar name={friend.display_name} size={64} partner />
-        <View style={{ flex: 1 }}>
-          <AppText variant="heading">{friend.display_name}</AppText>
-          <AppText tone="muted">@{friend.username}</AppText>
-        </View>
-      </View>
+      <PageHeader title={friend.display_name} subtitle={`@${friend.username}`} parent="/friends" />
 
       <Button
         label={pinned.includes(friend.id) ? 'Unpin from Home' : 'Pin to Home'}
@@ -143,7 +136,6 @@ export default function FriendScreen() {
         ))
       )}
 
-      <Button label="Back to Friends" variant="secondary" onPress={() => router.replace('/friends')} />
 
       <ConfirmDialog
         visible={replacing !== null}

@@ -51,6 +51,9 @@ export default function AppLayout() {
       <Stack.Protected guard={onboarded}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="privacy" />
+        <Stack.Screen name="notifications" />
+        <Stack.Screen name="appearance" />
         <Stack.Screen name="muscles" />
         <Stack.Screen name="weight" />
         <Stack.Screen name="metric/[type]" />

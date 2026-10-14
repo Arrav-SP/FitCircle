@@ -9,6 +9,7 @@ import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DateTimeField } from '@/components/DateTimeField';
 import { LineChart } from '@/components/LineChart';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { TextField } from '@/components/TextField';
@@ -53,7 +54,6 @@ export default function DailyMetricScreen() {
 
 function DailyMetric({ type }: { type: DailyType }) {
   const colors = useColors();
-  const router = useRouter();
   const history = useMetricHistory(type);
   const save = useSaveMetric(type);
   const remove = useDeleteMetric(type);
@@ -84,10 +84,7 @@ function DailyMetric({ type }: { type: DailyType }) {
 
   return (
     <Screen>
-      <View style={{ gap: spacing.xs }}>
-        <AppText variant="title">{copy.title}</AppText>
-        <AppText tone="muted">Only you can see this.</AppText>
-      </View>
+      <PageHeader title={copy.title} subtitle="Only you can see this." parent="/health" />
 
       {history.isPending ? (
         <Skeleton height={140} />
@@ -165,7 +162,6 @@ function DailyMetric({ type }: { type: DailyType }) {
         </>
       )}
 
-      <Button label="Back to Health" variant="secondary" onPress={() => router.replace('/health')} />
 
       <ConfirmDialog
         visible={deleting !== null}

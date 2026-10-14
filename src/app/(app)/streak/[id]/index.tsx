@@ -8,6 +8,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PairRings } from '@/components/PairRings';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { StreakFlame } from '@/components/StreakFlame';
 import { BigNumber, Tile } from '@/components/Tile';
@@ -141,7 +142,7 @@ function StreakOverview({ streak, partner, me }: LoadedStreak) {
 
   return (
     <Screen>
-      <AppText variant="title">With {partner}</AppText>
+      <PageHeader title={`With ${partner}`} parent="/streaks" />
 
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -206,7 +207,6 @@ function StreakOverview({ streak, partner, me }: LoadedStreak) {
             }}
           />
         ) : null}
-        <Button label="Back to Streaks" variant="secondary" onPress={() => router.replace('/streaks')} />
       </View>
 
       <ConfirmDialog

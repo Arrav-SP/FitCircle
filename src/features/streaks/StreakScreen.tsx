@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { useSession } from '@/features/auth/session';
@@ -65,21 +65,12 @@ export function StreakLoader({ children }: { children: (loaded: LoadedStreak) =>
   return children({ streak, partner, me });
 }
 
-/** A page for one part of a streak: its name, who it is with, the content, and the way back. */
+/** A page for one part of a streak: its name, who it is with (back arrow to the streak), and the content. */
 export function StreakSection({ title, streak, partner, children }: { title: string } & Omit<LoadedStreak, 'me'> & { children: ReactNode }) {
-  const router = useRouter();
   return (
     <Screen>
-      <View style={{ gap: spacing.xs }}>
-        <AppText variant="title">{title}</AppText>
-        <AppText tone="muted">With {partner}</AppText>
-      </View>
+      <PageHeader title={title} subtitle={`With ${partner}`} parent={{ pathname: '/streak/[id]', params: { id: streak.id } }} />
       {children}
-      <Button
-        label="Back to streak"
-        variant="secondary"
-        onPress={() => router.replace({ pathname: '/streak/[id]', params: { id: streak.id } })}
-      />
     </Screen>
   );
 }

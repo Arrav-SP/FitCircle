@@ -13,7 +13,7 @@ export default function SettingsScreen() {
 
   return (
     <ProfileForm
-      title="Profile and goals"
+      title="Goals and profile"
       initial={profile}
       usernameEditable={false}
       submitLabel="Save"

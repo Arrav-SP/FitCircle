@@ -1,10 +1,10 @@
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { BigNumber } from '@/components/Tile';
@@ -25,7 +25,6 @@ export default function StreakRecapScreen() {
 
 function Recap({ streak, partner, me }: LoadedStreak) {
   const colors = useColors();
-  const router = useRouter();
   const myName = useMyProfile().data?.display_name ?? 'You';
   // Optional extra: the recap shows without the dares row if they fail to load.
   const dares = useDares(streak.id);
@@ -60,7 +59,7 @@ function Recap({ streak, partner, me }: LoadedStreak) {
 
   return (
     <Screen>
-      <AppText variant="title">Week with {partner}</AppText>
+      <PageHeader title="Weekly recap" subtitle={`With ${partner}`} parent={{ pathname: '/streak/[id]', params: { id: streak.id } }} />
       <SegmentedControl
         label="Week"
         options={[
@@ -95,11 +94,6 @@ function Recap({ streak, partner, me }: LoadedStreak) {
           </AppText>
         ) : null}
         <Button label={shareState === 'busy' ? 'Making picture…' : 'Share'} disabled={shareState === 'busy'} onPress={share} />
-        <Button
-          label="Back to streak"
-          variant="secondary"
-          onPress={() => router.replace({ pathname: '/streak/[id]', params: { id: streak.id } })}
-        />
       </View>
     </Screen>
   );

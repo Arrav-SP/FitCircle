@@ -1,10 +1,9 @@
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { ErrorState, Skeleton } from '@/components/States';
 import { useMyProfile } from '@/features/profile/profile';
@@ -17,7 +16,6 @@ const BAR_HEIGHT = 120;
 
 export default function ProgressScreen() {
   const colors = useColors();
-  const router = useRouter();
   const profile = useMyProfile().data;
   const workouts = useWorkouts();
   const [today] = useState(() => new Date());
@@ -31,7 +29,7 @@ export default function ProgressScreen() {
 
   return (
     <Screen>
-      <AppText variant="title">Progress</AppText>
+      <PageHeader title="Progress" parent="/log" />
 
       {workouts.isPending ? (
         <>
@@ -103,7 +101,6 @@ export default function ProgressScreen() {
         </>
       )}
 
-      <Button label="Back to Log" variant="secondary" onPress={() => router.replace('/log')} />
     </Screen>
   );
 }

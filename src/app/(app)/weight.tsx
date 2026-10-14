@@ -1,5 +1,4 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -9,6 +8,7 @@ import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DateTimeField } from '@/components/DateTimeField';
 import { LineChart } from '@/components/LineChart';
+import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { ErrorState, Skeleton } from '@/components/States';
 import { TextField } from '@/components/TextField';
@@ -25,7 +25,6 @@ const formatDay = (date: string) =>
 
 export default function BodyWeightScreen() {
   const colors = useColors();
-  const router = useRouter();
   const profile = useMyProfile().data;
   const weights = useBodyWeights();
   const save = useSaveMetric('body_weight');
@@ -52,10 +51,7 @@ export default function BodyWeightScreen() {
 
   return (
     <Screen>
-      <View style={{ gap: spacing.xs }}>
-        <AppText variant="title">Body weight</AppText>
-        <AppText tone="muted">Only you can see this.</AppText>
-      </View>
+      <PageHeader title="Body weight" subtitle="Only you can see this." parent="/health" />
 
       {weights.isPending ? (
         <Skeleton height={140} />
@@ -142,7 +138,6 @@ export default function BodyWeightScreen() {
         </>
       )}
 
-      <Button label="Back to Health" variant="secondary" onPress={() => router.replace('/health')} />
 
       <ConfirmDialog
         visible={deleting !== null}

@@ -1,8 +1,8 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
 
-import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { Tile } from '@/components/Tile';
+import { useColors } from '@/theme/tokens';
 
 import { installState } from './install';
 
@@ -14,6 +14,7 @@ const standalone = () =>
 
 /** Offers to put FitCircle on the home screen; hidden once it is running from there. */
 export function InstallCard() {
+  const colors = useColors();
   const [offer, setOffer] = useState(() => (window as InstallWindow).fitcircleInstallPrompt ?? null);
   const [installed, setInstalled] = useState(standalone);
 
@@ -32,29 +33,29 @@ export function InstallCard() {
   const state = installState({ standalone: installed, canPrompt: offer !== null, userAgent: navigator.userAgent });
   if (state === 'installed') return null;
 
+  const install = async () => {
+    if (!offer) return;
+    await offer.prompt();
+    const { outcome } = await offer.userChoice;
+    // The browser's offer can only be used once.
+    (window as InstallWindow).fitcircleInstallPrompt = undefined;
+    setOffer(null);
+    if (outcome === 'accepted') setInstalled(true);
+  };
+
   return (
-    <Card>
-      <AppText variant="heading">Install FitCircle</AppText>
-      <AppText tone="muted">
-        {state === 'ios'
+    <Tile
+      title="Install FitCircle"
+      caption={
+        state === 'ios'
           ? 'In Safari, tap Share, then Add to Home Screen.'
           : state === 'manual'
             ? "In your browser's menu, choose Install app or Add to Home screen."
-            : 'Open it from your home screen like any app.'}
-      </AppText>
-      {state === 'prompt' && offer ? (
-        <Button
-          label="Install"
-          onPress={async () => {
-            await offer.prompt();
-            const { outcome } = await offer.userChoice;
-            // The browser's offer can only be used once.
-            (window as InstallWindow).fitcircleInstallPrompt = undefined;
-            setOffer(null);
-            if (outcome === 'accepted') setInstalled(true);
-          }}
-        />
-      ) : null}
-    </Card>
+            : 'Tap to put it on your home screen.'
+      }
+      captionTone={state === 'prompt' ? 'accent' : 'muted'}
+      onPress={state === 'prompt' ? install : undefined}>
+      <Ionicons name="download-outline" size={40} color={colors.accent} />
+    </Tile>
   );
 }
