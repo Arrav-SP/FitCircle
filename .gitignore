@@ -57,6 +57,15 @@ graphify-out/
 .claude/
 .eas/
 
+# AI assistant instructions, prompts and planning notes (kept locally only)
+CLAUDE.md
+AGENTS.md
+FitCircle_Master_Prompt.md
+fitcircle-planning/
+
+# editor settings
+.vscode/
+
 # logs and test output
 *.log
 logs/

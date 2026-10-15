@@ -1,6 +1,6 @@
 # FitCircle
 
-A private workout-streak app for a small group of friends. Plan and scope: `fitcircle-planning/FINAL_PRODUCT_BLUEPRINT.md`.
+A private workout-streak app for a small group of friends.
 
 Expo SDK 57 (React Native 0.86, React 19), Supabase (`@supabase/supabase-js` 2.x, CLI 2.120). The product is the web build; routes live in `src/app/`.
 
