@@ -17,7 +17,7 @@ select lives_ok(
 select is((select count(*) from public.profiles), 1::bigint, 'owner reads own profile');
 select is((select display_name from public.profiles), 'Alice', 'display name is trimmed');
 select is((select count(*) from public.user_private), 1::bigint, 'owner reads own settings');
-select is((select share_workouts_default from public.user_private), false, 'sharing is off by default');
+select is((select terms_accepted_at from public.user_private), null, 'no consent is recorded until it is given');
 select lives_ok(
   $$update public.user_private set units = 'lb', water_goal = 10$$,
   'owner updates own settings');

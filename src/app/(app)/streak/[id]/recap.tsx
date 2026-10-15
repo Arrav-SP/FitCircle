@@ -5,12 +5,13 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { PageHeader } from '@/components/PageHeader';
+import { Row } from '@/components/Row';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { BigNumber } from '@/components/Tile';
 import { useMyProfile } from '@/features/profile/profile';
 import { shareRecapImage, type RecapCard } from '@/features/streaks/recapImage';
-import { DayDots } from '@/features/streaks/DayDots';
+import { DayDots, DayLegend } from '@/features/streaks/DayDots';
 import { addDays, localDateIn, weekRecap, weekStartOf, WEEKDAY_LABELS } from '@/features/streaks/streak';
 import { StreakLoader, type LoadedStreak } from '@/features/streaks/StreakScreen';
 import { useDares } from '@/features/streaks/streaks';
@@ -74,14 +75,10 @@ function Recap({ streak, partner, me }: LoadedStreak) {
         <AppText tone="muted">{range}</AppText>
         <BigNumber value={recap.both} unit={headline} />
         <DayDots partnerName={partner} days={recap.days.map((state, index) => ({ label: WEEKDAY_LABELS[index], state }))} />
+        <DayLegend partnerName={partner} />
         <View style={{ gap: spacing.xs }}>
           {rows.map(([label, value]) => (
-            <View key={label} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.lg }}>
-              <AppText tone="muted">{label}</AppText>
-              <AppText variant="label" style={{ fontSize: 16 }}>
-                {value}
-              </AppText>
-            </View>
+            <Row key={label} label={label} value={value} />
           ))}
         </View>
       </Card>

@@ -1,6 +1,7 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
@@ -15,8 +16,10 @@ import { useMyProfile } from '@/features/profile/profile';
 import { describeSet, draftFromFriendWorkout, type Workout } from '@/features/workouts/draft';
 import { readStoredDraft } from '@/features/workouts/WorkoutEditor';
 import { formatWorkoutDate, useExercises } from '@/features/workouts/workouts';
+import { useColors } from '@/theme/tokens';
 
 export default function FriendScreen() {
+  const colors = useColors();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const profile = useMyProfile().data;
@@ -57,6 +60,7 @@ export default function FriendScreen() {
   }
 
   const friend = friends.data.find((item) => item.id === id);
+  const isPinned = !!friend && pinned.includes(friend.id);
 
   // Starts a new workout of your own from one of theirs. Nothing is saved until you press Save in the editor.
   function copy(workout: Workout) {
@@ -86,12 +90,20 @@ export default function FriendScreen() {
 
   return (
     <Screen>
-      <PageHeader title={friend.display_name} subtitle={`@${friend.username}`} parent="/friends" />
-
-      <Button
-        label={pinned.includes(friend.id) ? 'Unpin from Home' : 'Pin to Home'}
-        variant="secondary"
-        onPress={() => togglePin.mutate(friend.id)}
+      <PageHeader
+        title={friend.display_name}
+        subtitle={`@${friend.username}`}
+        parent="/friends"
+        right={
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityLabel={`Pin ${friend.display_name} to Home`}
+            accessibilityState={{ checked: isPinned }}
+            onPress={() => togglePin.mutate(friend.id)}
+            style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center' }}>
+            <Ionicons name={isPinned ? 'pin' : 'pin-outline'} size={24} color={isPinned ? colors.accent : colors.text} />
+          </Pressable>
+        }
       />
 
       {workouts.data.length === 0 ? (
@@ -111,7 +123,7 @@ export default function FriendScreen() {
             </View>
             {workout.exercises.map((exercise, index) => (
               <View key={`${exercise.exercise_id}-${index}`}>
-                <AppText variant="label" style={{ fontSize: 16 }}>
+                <AppText variant="value">
                   {exercise.name}
                 </AppText>
                 <AppText variant="caption" tone="muted" style={{ fontVariant: ['tabular-nums'] }}>
@@ -123,7 +135,7 @@ export default function FriendScreen() {
             ))}
             <Button
               label="Do this workout"
-              variant="secondary"
+              variant="link"
               disabled={!exercises.data}
               onPress={() => (readStoredDraft(draftKey) ? setReplacing(workout) : copy(workout))}
             />

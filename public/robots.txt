@@ -1,0 +1,4 @@
+# FitCircle is a private app for friends. Pages carry <meta name="robots" content="noindex">, which search engines can
+# only see if they may read the page, so nothing is blocked here; link previews for shared invites keep working.
+User-agent: *
+Allow: /

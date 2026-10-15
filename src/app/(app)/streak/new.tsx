@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { Chip, ChipRow } from '@/components/ChipGroup';
 import { Card } from '@/components/Card';
 import { NumberStepper } from '@/components/NumberStepper';
 import { Screen } from '@/components/Screen';
@@ -14,39 +15,12 @@ import { useSession } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
 import { DEAL_TARGETS, partnerId, streakErrorMessage, WEEKDAY_LABELS } from '@/features/streaks/streak';
 import { useProposeStreak, useStreaks } from '@/features/streaks/streaks';
-import { radius, spacing, useColors } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 
 const START_OPTIONS = [
   { value: 'same', label: 'Day they accept' },
   { value: 'next', label: 'Day after' },
 ] as const;
-
-type ChipProps = { label: string; selected: boolean; role: 'radio' | 'checkbox'; onPress: () => void };
-
-function Chip({ label, selected, role, onPress }: ChipProps) {
-  const colors = useColors();
-  return (
-    <Pressable
-      accessibilityRole={role}
-      accessibilityState={role === 'radio' ? { selected } : { checked: selected }}
-      onPress={onPress}
-      style={{
-        minHeight: 48,
-        minWidth: 56,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        borderRadius: radius.full,
-        borderWidth: 1.5,
-        borderColor: selected ? colors.accent : colors.borderStrong,
-        backgroundColor: selected ? colors.accent : 'transparent',
-      }}>
-      <AppText variant="label" tone={selected ? 'onAccent' : 'default'}>
-        {label}
-      </AppText>
-    </Pressable>
-  );
-}
 
 export default function NewStreakScreen() {
   const router = useRouter();
@@ -107,8 +81,13 @@ export default function NewStreakScreen() {
         <EmptyState
           icon="people-outline"
           title="No one to start with"
-          message={friends.data.length === 0 ? 'Invite a friend first.' : 'You already have a streak with every friend.'}
-          action={{ label: 'Go to Friends', onPress: () => router.replace('/friends') }}
+          message={
+            friends.data.length === 0 ? 'Invite a friend first.' : 'You already have a streak with every friend.'
+          }
+          action={{
+            label: 'Go to Friends',
+            onPress: () => router.replace('/friends'),
+          }}
         />
       </Screen>
     );
@@ -122,24 +101,19 @@ export default function NewStreakScreen() {
     <Screen>
       <AppText variant="title">Start a streak</AppText>
 
-      <View style={{ gap: spacing.sm }}>
-        <AppText variant="label">With</AppText>
-        <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+      <Card>
+        <ChipRow label="With">
           {available.map((friend) => (
             <Chip
               key={friend.id}
-              role="radio"
               label={friend.display_name}
               selected={chosen === friend.id}
               onPress={() => setFriendId(friend.id)}
             />
           ))}
-        </View>
-      </View>
+        </ChipRow>
 
-      <View style={{ gap: spacing.sm }}>
-        <AppText variant="label">Workout days</AppText>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+        <ChipRow label="Workout days" role="group">
           {WEEKDAY_LABELS.map((label, index) => (
             <Chip
               key={label}
@@ -149,50 +123,48 @@ export default function NewStreakScreen() {
               onPress={() => toggleDay(index + 1)}
             />
           ))}
-        </View>
+        </ChipRow>
+
+        <NumberStepper
+          label="Shortest workout that counts"
+          value={minMinutes}
+          min={5}
+          max={180}
+          stepSize={5}
+          unit="minutes"
+          onChange={setMinMinutes}
+        />
+
+        <SegmentedControl
+          label="Starts"
+          hint="A day counts when you both log a workout by 3 am the next morning."
+          options={START_OPTIONS}
+          value={start}
+          onChange={setStart}
+        />
+      </Card>
+
+      <View>
+        <AppText variant="heading">The deal</AppText>
+        <AppText variant="caption" tone="muted">
+          Optional. Your friend sees it before accepting, and it cannot be changed later.
+        </AppText>
       </View>
-
-      <NumberStepper
-        label="Shortest workout that counts"
-        value={minMinutes}
-        min={5}
-        max={180}
-        stepSize={5}
-        unit="minutes"
-        onChange={setMinMinutes}
-      />
-
-      <SegmentedControl
-        label="Starts"
-        hint="A day counts when you both log a workout by 3 am the next morning."
-        options={START_OPTIONS}
-        value={start}
-        onChange={setStart}
-      />
-
       <Card>
-        <View>
-          <AppText variant="heading">The deal</AppText>
-          <AppText variant="caption" tone="muted">
-            Optional. Your friend sees it before accepting, and it cannot be changed later.
-          </AppText>
-        </View>
         <TextField label="Reward" value={reward} onChangeText={setReward} maxLength={80} placeholder="Dinner out" />
         <View style={{ gap: spacing.sm }}>
-          <AppText variant="label">Reward at</AppText>
-          <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-            <Chip role="radio" label="No target" selected={!custom && targetDays === null} onPress={() => pickTarget(null)} />
+          <ChipRow label="Reward at">
+            <Chip label="No target" selected={!custom && targetDays === null} onPress={() => pickTarget(null)} />
             {DEAL_TARGETS.map((days) => (
               <Chip
                 key={days}
-                role="radio"
                 label={`${days} days`}
                 selected={!custom && targetDays === days}
                 onPress={() => pickTarget(days)}
               />
             ))}
-            <Chip role="radio" label="Custom" selected={custom} onPress={() => setCustom(true)} />
-          </View>
+            <Chip label="Custom" selected={custom} onPress={() => setCustom(true)} />
+          </ChipRow>
           {custom ? (
             <TextField
               label="Number of days"
@@ -227,7 +199,15 @@ export default function NewStreakScreen() {
           onPress={() =>
             chosen &&
             propose.mutate(
-              { friendId: chosen, weekdays, minMinutes, startSameDay: start === 'same', reward, forfeit, targetDays: target ?? null },
+              {
+                friendId: chosen,
+                weekdays,
+                minMinutes,
+                startSameDay: start === 'same',
+                reward,
+                forfeit,
+                targetDays: target ?? null,
+              },
               { onSuccess: () => router.replace('/streaks') },
             )
           }

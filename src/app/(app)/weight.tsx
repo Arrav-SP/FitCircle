@@ -71,7 +71,7 @@ export default function BodyWeightScreen() {
               <AppText tone="muted">No entries yet.</AppText>
             )}
             {latest && oldest ? (
-              <AppText variant="label" tone="accent" style={{ fontSize: 16 }}>
+              <AppText variant="value" tone="accent">
                 {weightChange(latest.kg, oldest.kg, units)} since {formatDay(oldest.local_date)}
               </AppText>
             ) : null}
@@ -118,7 +118,7 @@ export default function BodyWeightScreen() {
               {entries.map((entry) => (
                 <View key={entry.id} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                   <AppText style={{ flex: 1 }}>{formatDay(entry.local_date)}</AppText>
-                  <AppText variant="label" style={{ fontSize: 16, fontVariant: ['tabular-nums'] }}>
+                  <AppText variant="value" style={{ fontVariant: ['tabular-nums'] }}>
                     {formatWeight(entry.kg, units)}
                   </AppText>
                   <Pressable

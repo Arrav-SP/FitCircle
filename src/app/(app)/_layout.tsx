@@ -5,8 +5,10 @@ import { View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
 import { ErrorState, Skeleton } from '@/components/States';
+import { POLICY_VERSION } from '@/config/legal';
 import { signOut } from '@/features/auth/session';
 import { takePendingInvite, tokenFromPath } from '@/features/friends/invite';
+import { ConsentScreen } from '@/features/legal/ConsentScreen';
 import { useMyProfile } from '@/features/profile/profile';
 import { spacing, useColors } from '@/theme/tokens';
 
@@ -46,6 +48,9 @@ export default function AppLayout() {
     );
   }
 
+  // Everyone agrees to the current Terms and Privacy Policy before using the app (new people do it in onboarding).
+  if (onboarded && profile.data?.terms_version !== POLICY_VERSION) return <ConsentScreen />;
+
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
       <Stack.Protected guard={onboarded}>
@@ -54,12 +59,16 @@ export default function AppLayout() {
         <Stack.Screen name="privacy" />
         <Stack.Screen name="notifications" />
         <Stack.Screen name="appearance" />
+        <Stack.Screen name="your-data" />
+        <Stack.Screen name="about" />
         <Stack.Screen name="muscles" />
         <Stack.Screen name="weight" />
         <Stack.Screen name="metric/[type]" />
         <Stack.Screen name="progress" />
         <Stack.Screen name="history" />
         <Stack.Screen name="friends" />
+        <Stack.Screen name="new-invite" />
+        <Stack.Screen name="activity" />
         <Stack.Screen name="friend/[id]" />
         <Stack.Screen name="streak/new" />
         <Stack.Screen name="streak/[id]/index" />

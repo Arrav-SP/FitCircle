@@ -33,7 +33,10 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = new URL(event.notification.data?.url || '/', self.location.origin).href;
+  // Only ever open FitCircle's own pages, whatever a notification says.
+  let url = new URL(event.notification.data?.url || '/', self.location.origin);
+  if (url.origin !== self.location.origin) url = new URL('/', self.location.origin);
+  url = url.href;
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
       const open = windows.find((client) => client.url.startsWith(self.location.origin));

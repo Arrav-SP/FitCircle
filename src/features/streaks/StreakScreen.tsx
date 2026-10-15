@@ -1,14 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
-import { View } from 'react-native';
 
-import { AppText } from '@/components/AppText';
 import { PageHeader } from '@/components/PageHeader';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { useSession } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
-import { spacing } from '@/theme/tokens';
 
 import { partnerId, type Streak } from './streak';
 import { useStreaks } from './streaks';
@@ -75,14 +72,4 @@ export function StreakSection({ title, streak, partner, children }: { title: str
   );
 }
 
-/** A label on the left and its value on the right. */
-export function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing.lg }}>
-      <AppText tone="muted">{label}</AppText>
-      <AppText variant="label" style={{ fontSize: 16 }}>
-        {value}
-      </AppText>
-    </View>
-  );
-}
+export { Row } from '@/components/Row';

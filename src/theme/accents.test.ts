@@ -47,6 +47,15 @@ for (const scheme of ['light', 'dark'] as const) {
       atLeast(colors.danger, colors.bg, 4.5, 'error text on the page');
       atLeast(colors.success, colors.bg, 4.5, 'success colour on the page');
       atLeast(colors.warning, colors.bg, 4.5, 'warning colour on the page');
+
+      // Inside cards and tiles.
+      atLeast(colors.text, colors.surface, 4.5, 'text on a card');
+      atLeast(colors.textMuted, colors.surface, 4.5, 'caption on a card');
+      atLeast(colors.danger, colors.surface, 4.5, 'error text on a card');
+      atLeast(colors.borderStrong, colors.surface, 3, 'control outline and ring on a card');
+      atLeast(colors.accent, colors.surfaceSunken, 3, 'progress bar on its track');
+      atLeast(colors.accent, colors.accentMuted, 4.5, 'your reaction count on its tint');
+      // Weeks below goal in the Progress bars use borderStrong, checked above; the pale highlight is only for the figure.
     });
   }
 }

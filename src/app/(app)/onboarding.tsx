@@ -19,6 +19,7 @@ export default function OnboardingScreen() {
         water_goal: 8,
       }}
       usernameEditable
+      requireConsent
       submitLabel="Continue"
       busy={onboarding.isPending}
       error={onboarding.isError ? profileErrorMessage(onboarding.error) : null}

@@ -142,7 +142,7 @@ function DailyMetric({ type }: { type: DailyType }) {
               {entries.map((entry) => (
                 <View key={entry.id} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                   <AppText style={{ flex: 1 }}>{formatDay(entry.local_date)}</AppText>
-                  <AppText variant="label" style={{ fontSize: 16, fontVariant: ['tabular-nums'] }}>
+                  <AppText variant="value" style={{ fontVariant: ['tabular-nums'] }}>
                     {formatDaily(type, entry.value)}
                   </AppText>
                   <Pressable

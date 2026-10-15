@@ -23,7 +23,6 @@ export function Feed() {
 
   return (
     <View style={{ gap: spacing.md }}>
-      <AppText variant="heading">Activity</AppText>
       {feed.isPending ? (
         <Skeleton height={120} />
       ) : feed.isError ? (
@@ -42,7 +41,7 @@ export function Feed() {
                 style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 48 }}>
                 <Avatar name={item.actor_name} size={40} partner />
                 <View style={{ flex: 1 }}>
-                  <AppText variant="label" numberOfLines={1} style={{ fontSize: 16 }}>
+                  <AppText variant="value" numberOfLines={1}>
                     {item.actor_name}: {item.title}
                   </AppText>
                   <AppText variant="caption" tone="muted" numberOfLines={1}>
@@ -71,7 +70,7 @@ export function Feed() {
                   <Ionicons name="flame" size={20} color={colors.accent} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <AppText variant="label" numberOfLines={1} style={{ fontSize: 16 }}>
+                  <AppText variant="value" numberOfLines={1}>
                     {item.milestone} day streak
                   </AppText>
                   <AppText variant="caption" tone="muted" numberOfLines={1}>

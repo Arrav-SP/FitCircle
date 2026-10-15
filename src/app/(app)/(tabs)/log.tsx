@@ -73,7 +73,7 @@ export default function LogScreen() {
                 // An empty week keeps a sliver so its column still shows.
                 height: Math.max(4, (week.count / tallest) * BAR_HEIGHT),
                 borderRadius: radius.input / 2,
-                backgroundColor: week.count >= goal ? colors.accent : colors.highlightSoft,
+                backgroundColor: week.count >= goal ? colors.accent : colors.borderStrong,
               }}
             />
           ))}

@@ -1,19 +1,17 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
-import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Screen } from '@/components/Screen';
 import { BigNumber, Tile, TileIcon } from '@/components/Tile';
 import { InstallCard } from '@/features/app/InstallCard';
 import { signOut } from '@/features/auth/session';
 import { useFriends } from '@/features/friends/friends';
 import { KINDS, notificationsSummary, usePushDevice } from '@/features/notifications/NotificationsCard';
-import { useDeleteAccount, useMyProfile } from '@/features/profile/profile';
+import { useMyProfile } from '@/features/profile/profile';
 import { ACCENTS } from '@/theme/accents';
 import { spacing, useColors, useTheme } from '@/theme/tokens';
 
@@ -27,8 +25,6 @@ export default function ProfileScreen() {
   const profile = useMyProfile().data;
   const friends = useFriends();
   const push = usePushDevice();
-  const deleteAccount = useDeleteAccount();
-  const [deleting, setDeleting] = useState(false);
   if (!profile) return null;
 
   const friendCount = friends.data?.length;
@@ -76,31 +72,16 @@ export default function ProfileScreen() {
         </View>
       </Tile>
 
-      <View style={{ gap: spacing.md }}>
-        <Button label="Sign out" variant="secondary" onPress={() => signOut()} />
-        <Button
-          label="Delete account"
-          variant="danger"
-          onPress={() => {
-            deleteAccount.reset();
-            setDeleting(true);
-          }}
-        />
+      <View style={{ flexDirection: 'row', gap: spacing.md }}>
+        <Tile fill title="Your data" caption="Download or delete" onPress={() => router.push('/your-data')}>
+          <TileIcon name="download-outline" />
+        </Tile>
+        <Tile fill title="About and legal" caption="Privacy, terms, help" onPress={() => router.push('/about')}>
+          <TileIcon name="document-text-outline" />
+        </Tile>
       </View>
 
-      <ConfirmDialog
-        visible={deleting}
-        title="Delete your account?"
-        message={
-          deleteAccount.isError
-            ? 'That did not work. Check your connection and try again.'
-            : 'Your profile, workouts, health entries and friendships are deleted for good, and your streaks end. This cannot be undone.'
-        }
-        confirmLabel="Delete everything"
-        busy={deleteAccount.isPending}
-        onConfirm={() => deleteAccount.mutate()}
-        onCancel={() => setDeleting(false)}
-      />
+      <Button label="Sign out" variant="secondary" onPress={() => signOut()} />
     </Screen>
   );
 }

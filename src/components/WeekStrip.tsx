@@ -66,7 +66,7 @@ export function WeekStrip({ today, week = today, activeDays, selectedKey, onSele
             <AppText variant="caption" tone={filled ? 'onAccent' : 'muted'} style={{ fontSize: 12 }}>
               {WEEKDAYS[index]}
             </AppText>
-            <AppText variant="label" tone={filled ? 'onAccent' : 'default'} style={{ fontSize: 16 }}>
+            <AppText variant="value" tone={filled ? 'onAccent' : 'default'}>
               {day.getDate()}
             </AppText>
             <View

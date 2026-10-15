@@ -86,7 +86,7 @@ export default function TrainedMusclesScreen() {
       <View style={{ gap: spacing.sm }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           {arrow(-1, false)}
-          <AppText variant="label" style={{ fontSize: 16 }}>
+          <AppText variant="value">
             {periodLabel}
           </AppText>
           {arrow(1, isThisWeek)}
@@ -159,7 +159,7 @@ export default function TrainedMusclesScreen() {
                       }}
                     />
                     <AppText style={{ flex: 1 }}>{MUSCLE_LABELS[total.group]}</AppText>
-                    <AppText variant="label" style={{ fontSize: 16, fontVariant: ['tabular-nums'] }}>
+                    <AppText variant="value" style={{ fontVariant: ['tabular-nums'] }}>
                       {parts.join(', ') || `${total.exercises} ${total.exercises === 1 ? 'exercise' : 'exercises'}`}
                     </AppText>
                   </View>

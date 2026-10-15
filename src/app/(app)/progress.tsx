@@ -65,7 +65,7 @@ export default function ProgressScreen() {
                           // An empty week keeps a sliver so the column is still visible.
                           height: Math.max(4, (week.count / tallest) * BAR_HEIGHT),
                           borderRadius: radius.input / 2,
-                          backgroundColor: met ? colors.accent : colors.highlightSoft,
+                          backgroundColor: met ? colors.accent : colors.borderStrong,
                         }}
                       />
                     </View>
@@ -91,7 +91,7 @@ export default function ProgressScreen() {
                       {formatWorkoutDate(lift.date)}
                     </AppText>
                   </View>
-                  <AppText variant="label" style={{ fontSize: 16, fontVariant: ['tabular-nums'] }}>
+                  <AppText variant="value" style={{ fontVariant: ['tabular-nums'] }}>
                     {formatWeight(lift.kg, profile.units)} × {lift.reps}
                   </AppText>
                 </View>

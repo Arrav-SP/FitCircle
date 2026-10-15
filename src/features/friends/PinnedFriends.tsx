@@ -37,7 +37,7 @@ function PinnedRow({ friend, now }: { friend: Profile; now: Date }) {
       style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 48 }}>
       <Avatar name={friend.display_name} size={40} partner />
       <View style={{ flex: 1 }}>
-        <AppText variant="label" numberOfLines={1} style={{ fontSize: 16 }}>
+        <AppText variant="value" numberOfLines={1}>
           {friend.display_name}
         </AppText>
         <AppText variant="caption" tone="muted" numberOfLines={1}>

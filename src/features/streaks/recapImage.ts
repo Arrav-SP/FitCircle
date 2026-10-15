@@ -41,13 +41,20 @@ export function drawRecapImage(card: RecapCard, colors: Colors): HTMLCanvasEleme
   const cell = (WIDTH - EDGE * 2) / 7;
   card.recap.days.forEach((day, index) => {
     const x = EDGE + cell * index + cell / 2;
+    // The same marks as the app's day dots (DayDots.tsx): your colour, your partner's colour, grey.
     ctx.beginPath();
     ctx.arc(x, 850, day === 'rest' ? 8 : 46, 0, Math.PI * 2);
     ctx.lineWidth = 8;
-    ctx.strokeStyle = day === 'covered' ? colors.accent : colors.borderStrong;
+    ctx.strokeStyle = day === 'partner' ? colors.partner : day === 'none' ? colors.borderStrong : colors.accent;
     ctx.fillStyle = day === 'both' ? colors.accent : day === 'rest' ? colors.border : colors.bg;
     ctx.fill();
     if (day !== 'both' && day !== 'rest') ctx.stroke();
+    if (day === 'covered') {
+      ctx.beginPath();
+      ctx.arc(x, 850, 15, 0, Math.PI * 2);
+      ctx.fillStyle = colors.accent;
+      ctx.fill();
+    }
     text(WEEKDAY_LABELS[index], x, 950, '32px sans-serif', colors.textMuted, 'center');
   });
 

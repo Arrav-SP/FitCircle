@@ -193,7 +193,7 @@ function StreakOverview({ streak, partner, me }: LoadedStreak) {
         {active ? (
           <Button
             label="End streak"
-            variant="danger"
+            variant="dangerLink"
             onPress={() => {
               end.reset();
               setConfirming(true);

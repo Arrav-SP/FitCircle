@@ -68,10 +68,21 @@ export function signInWithGoogle() {
   });
 }
 
+/**
+ * Kept when someone signs out: device preferences, and an invite link just opened (the automatic sign-out after a
+ * long break runs at start-up and must not lose it).
+ */
+const DEVICE_KEYS = new Set(['fitcircle.theme', 'fitcircle.accent', 'fitcircle.figure', 'fitcircle.pendingInvite']);
+
 export async function signOut() {
   // Stop this device getting the account's notifications; never let that block signing out.
   await forgetThisDevice().catch(() => undefined);
   await supabase.auth.signOut();
+  // What this browser kept for the account (pinned friends, an unsaved workout), so the next person on
+  // this device never sees it.
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith('fitcircle.') && !DEVICE_KEYS.has(key)) localStorage.removeItem(key);
+  }
   // Drop cached data so the next person on this device never sees it.
   queryClient.clear();
 }

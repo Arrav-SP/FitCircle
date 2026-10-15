@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { signOut, useSession } from '@/features/auth/session';
+import { POLICY_VERSION } from '@/config/legal';
 import { supabase } from '@/lib/supabase';
 
 export type Units = 'kg' | 'lb';
@@ -33,11 +34,11 @@ export function useMyProfile() {
   return useQuery({
     queryKey: profileKey(userId),
     enabled: !!userId,
-    queryFn: async (): Promise<(Profile & Settings & NotifySettings & { hide_workouts: boolean }) | null> => {
+    queryFn: async (): Promise<(Profile & Settings & NotifySettings & { hide_workouts: boolean; terms_version: string | null }) | null> => {
       const { data, error } = await supabase
         .from('profiles')
         .select(
-          'id, username, display_name, user_private(units, weekly_workout_goal, water_goal, hide_workouts, notify_partner, notify_reminders, notify_requests, notify_reactions)',
+          'id, username, display_name, user_private(units, weekly_workout_goal, water_goal, hide_workouts, notify_partner, notify_reminders, notify_requests, notify_reactions, terms_version)',
         )
         .eq('id', userId!)
         .maybeSingle();
@@ -63,6 +64,21 @@ export function useCompleteOnboarding() {
         p_weekly_workout_goal: input.weekly_workout_goal,
         p_water_goal: input.water_goal,
       });
+      if (error) throw error;
+      // The form only submits once the box is ticked. If this fails, the agreement screen asks again.
+      await supabase.schema('api').rpc('accept_terms', { p_version: POLICY_VERSION });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKey(userId) }),
+  });
+}
+
+/** Records agreement to the current Terms and Privacy Policy. */
+export function useAcceptTerms() {
+  const queryClient = useQueryClient();
+  const userId = useSession().session?.user.id;
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.schema('api').rpc('accept_terms', { p_version: POLICY_VERSION });
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKey(userId) }),
@@ -125,12 +141,7 @@ export function useDeleteAccount() {
     mutationFn: async () => {
       const { error } = await supabase.schema('api').rpc('delete_account');
       if (error) throw error;
-      // Things remembered on this device that belonged to the account.
-      for (const key of Object.keys(localStorage)) {
-        if (key.startsWith('fitcircle.') && key !== 'fitcircle.theme' && key !== 'fitcircle.accent') {
-          localStorage.removeItem(key);
-        }
-      }
+      // Signing out also clears what this browser kept for the account.
       await signOut();
     },
   });

@@ -5,9 +5,20 @@
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>%WEB_TITLE%</title>
+    <!-- A private app for friends: kept out of search results, but invite links still show a preview when shared. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="Workout streaks with your people. Train together, keep the streak alive." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FitCircle" />
+    <meta property="og:title" content="FitCircle" />
+    <meta property="og:description" content="Workout streaks with your people. Train together, keep the streak alive." />
+    <meta property="og:url" content="https://fitcircle-arav.expo.app/" />
+    <meta property="og:image" content="https://fitcircle-arav.expo.app/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
     <!-- Installable app: the manifest, icons and the colour of the phone's status bar. -->
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F3F5F9" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -15,6 +26,27 @@
     <meta name="apple-mobile-web-app-title" content="FitCircle" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
+      // Inside another site's frame, show nothing to click but a link that opens FitCircle properly. This stops
+      // clickjacking: the host cannot send frame-ancestors for this app, and browsers block redirecting the top window.
+      var framedElsewhere = false;
+      try {
+        framedElsewhere = window.top !== window.self && window.top.location.origin !== window.location.origin;
+      } catch (e) {
+        framedElsewhere = true;
+      }
+      if (framedElsewhere) {
+        window.addEventListener('DOMContentLoaded', function () {
+          // The app sets its own classes on <html>, so hide its container directly.
+          document.getElementById('root').style.setProperty('display', 'none', 'important');
+          var link = document.createElement('a');
+          link.href = window.location.href;
+          link.target = '_top';
+          link.rel = 'noopener';
+          link.textContent = 'Open FitCircle';
+          link.className = 'framed-link';
+          document.body.insertBefore(link, document.body.firstChild);
+        });
+      }
       // Chrome offers installing once, early on load; keep the offer for the Install button in Profile.
       window.addEventListener('beforeinstallprompt', function (event) {
         event.preventDefault();
@@ -31,6 +63,33 @@
       }
     </script>
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="fitcircle-a11y">
+      /* A visible ring for keyboard focus only (not taps). This blue is at least 3:1 against both white and black,
+         so it shows in either theme and on any accent. */
+      :focus-visible {
+        outline: 3px solid #3b82f6 !important;
+        outline-offset: 2px !important;
+      }
+      /* Shown only when FitCircle is inside another site's frame: the app is hidden behind a plain link. */
+      .framed-link {
+        display: block;
+        margin: 48px auto;
+        text-align: center;
+        font: 600 18px system-ui, sans-serif;
+        color: #3b82f6;
+      }
+      /* People who ask their device for less motion get none. */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
     <style id="expo-reset">
       /* These styles make the body full-height */
       html,

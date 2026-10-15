@@ -7,6 +7,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
+import { Row } from '@/components/Row';
 import { Screen } from '@/components/Screen';
 import { EmptyState, ErrorState, Skeleton } from '@/components/States';
 import { useMyProfile } from '@/features/profile/profile';
@@ -85,23 +86,13 @@ export default function WorkoutDetailScreen() {
             </AppText>
           </View>
           {exercise.duration_minutes ? (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <AppText tone="muted">Duration</AppText>
-              <AppText variant="label" style={{ fontSize: 16, fontVariant: ['tabular-nums'] }}>
-                {exercise.duration_minutes} min
-              </AppText>
-            </View>
+            <Row label="Duration" value={`${exercise.duration_minutes} min`} />
           ) : exercise.sets.length === 0 ? (
             <AppText tone="muted">No sets recorded.</AppText>
           ) : (
             <View style={{ gap: spacing.sm }}>
               {exercise.sets.map((set, setIndex) => (
-                <View key={setIndex} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <AppText tone="muted">Set {setIndex + 1}</AppText>
-                  <AppText variant="label" style={{ fontSize: 16, fontVariant: ['tabular-nums'] }}>
-                    {describeSet(set, profile.units)}
-                  </AppText>
-                </View>
+                <Row key={setIndex} label={`Set ${setIndex + 1}`} value={describeSet(set, profile.units)} />
               ))}
             </View>
           )}
@@ -117,7 +108,7 @@ export default function WorkoutDetailScreen() {
 
       <View style={{ gap: spacing.md }}>
         <Button label="Edit workout" onPress={() => router.push(`/workout/${workout.id}/edit`)} />
-        <Button label="Delete workout" variant="danger" onPress={() => setConfirming(true)} />
+        <Button label="Delete workout" variant="dangerLink" onPress={() => setConfirming(true)} />
       </View>
 
       <ConfirmDialog
