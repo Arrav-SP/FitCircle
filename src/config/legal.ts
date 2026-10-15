@@ -7,7 +7,7 @@ export const LEGAL = {
   /** The person or organisation that runs FitCircle and is responsible for its data. */
   operator: 'Arav Singh Patel',
   /** Where questions, data requests and complaints go. */
-  contactEmail: ' ',
+  contactEmail: 'fitcircle.support@gmail.com',
   /** The country (and state, if relevant) the operator runs FitCircle from; decides the governing law. */
   jurisdiction: 'India / Madhya Pradesh',
   /** The youngest age allowed to use FitCircle. Under India's DPDP Act anyone under 18 is a child. */
@@ -15,7 +15,7 @@ export const LEGAL = {
   /** Where the Supabase project stores data (Supabase dashboard > Project Settings > General > Region). */
   dataRegion: 'Mumbai, India (AWS ap-south-1)',
   /** How long the operator's own backup copies are kept before being deleted. */
-  backupRetention: '[BACKUP RETENTION, e.g. 4 weeks]',
+  backupRetention: '4 weeks',
   /** Shown at the top of each page. */
   effectiveDate: '15 October 2026',
 } as const;

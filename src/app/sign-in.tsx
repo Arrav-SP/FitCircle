@@ -34,11 +34,12 @@ export default function SignInScreen() {
   return (
     <Screen centered>
       <View style={{ gap: spacing.xl }}>
-        <PairRings size={72} youDone partnerDone />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <PairRings size={56} youDone partnerDone />
+          <AppText variant="title">FitCircle</AppText>
+        </View>
         <View style={{ gap: spacing.sm }}>
-          <AppText variant="display" accessibilityRole="header" {...{ 'aria-level': 1 }}>
-            Two people. One streak.
-          </AppText>
+          <AppText variant="display">Two people. One streak.</AppText>
           <AppText tone="muted">
             Pick your workout days with a friend. The streak grows only when you both show up.
           </AppText>
